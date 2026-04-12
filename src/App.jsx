@@ -213,7 +213,6 @@ function generateSubordinate(id) {
     id, name: `${last} ${first}`, gender: isFemale ? "F" : "M",
     age, trait, quirk, club, stats, overall, salary,
     assigned: null, turnsWorked: 0, mood: 70 + rand(-10, 10),
-    history: [],
   };
 }
 
@@ -285,22 +284,14 @@ const BANKRUPTCY_MSGS = [
 ];
 
 const BETRAYAL_MSGS = [
-  "退職届には一言「感謝」とだけ書かれていた。筆跡がいつもより丁寧だった",
-  "「CEOには悪いけど、俺のほうが上手くやれる」と言い残した。目は笑っていなかった",
-  "引き継ぎ資料は完璧だった。最後まで仕事ができる人間だった",
-  "最後のメールの件名が「さよなら、そしてありがとう」だった。本文は空だった",
+  "「お世話になりました。でも、もう限界です」と置き手紙を残して去った",
+  "「自分のやり方でやらせてもらいます」と不敵な笑みを浮かべた",
+  "退職届には一言「感謝」とだけ書かれていた",
+  "「CEOには悪いけど、俺のほうが上手くやれる」と言い残した",
+  "引き継ぎ資料が白紙だった。確信犯である",
+  "最後のメールの件名が「さよなら、そしてありがとう」だった",
   "「いつかまた一緒に仕事しましょう」社交辞令にしては目が本気だった",
-  "退職の挨拶メールが全社員に送られた。読んだ人の半分が「かっこいい」と思ってしまった",
-  "デスクに花が一輪置いてあった。誰に向けたものかは、わからない",
-  "最後の日、いつもより30分早く来て、いつも通りコーヒーを淹れて、黙って出ていった",
-  "「お世話になりました」。その一言に、怒りも感謝も全部入っていた",
-  "辞める前夜、後輩に2時間かけて仕事を教えていたらしい。最後まで面倒見がよかった",
-  "退職届を出したあと、なぜか掃除を始めた。自分のデスクだけ異様に綺麗にして去った",
-  "「この会社で学んだことは全部持っていきます」。それが一番困るのだが",
-  "私物を段ボール一箱にまとめるのに3分しかかからなかった。いつでも辞められる準備ができていた",
-  "最終日の帰り際に「あ、自販機に忘れ物あるんで」と言い残した。缶コーヒーが1本、置いてあった。CEOがいつも飲んでるやつだった",
-  "社員証を返却するとき、少しだけ手が止まった。それが唯一の迷いだった",
-  "後日、元同僚に「あの会社にいた時間は無駄じゃなかった」と言っていたらしい。なぜ直接言わないのか",
+  "退職の挨拶メールが全社員に送られた。添付ファイルは自社の求人票だった",
 ];
 
 const HEADHUNT_ORGS = [
@@ -430,107 +421,53 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: `${b.name}さんって毎日何時に来てるか知ってる？` },
       { name: b.name, text: "知らない。でも帰りは毎日一番最後だよね" },
       { name: a.name, text: "あれ仕事してんのかな。ネットサーフィンしてんのかな" },
-      { name: b.name, text: "でもさ、なんか帰りたくない日ってあるじゃん。家より会社のほうが落ち着くみたいな" },
-      { name: a.name, text: "…それはちょっとわかるかもしれない" },
     ],
     (a, b) => [
       { name: a.name, text: "CEOって普段何してるんだろ" },
       { name: b.name, text: "たまに見るけど、ずっとモニター見てるよ" },
       { name: a.name, text: "それ俺らもだけどね" },
-      { name: b.name, text: "でもあの人、たまにめっちゃ遠い目してるときあるよね" },
-      { name: a.name, text: "あれ何見えてるんだろうな" },
-      { name: b.name, text: "未来か、残高か" },
     ],
     (a, b) => [
       { name: a.name, text: "今日の社食なに？" },
       { name: b.name, text: "カレーとカレーうどん" },
       { name: a.name, text: "選択肢がカレーしかないじゃん" },
-      { name: b.name, text: "いや俺ね、社食のカレーにはこだわりがあって" },
-      { name: a.name, text: "出た、こだわり" },
-      { name: b.name, text: "木曜のカレーだけちょっとスパイス違うのよ。気づいてた？" },
-      { name: a.name, text: "気づいてない" },
-      { name: b.name, text: "木曜だけクミンが強いの。だから木曜は絶対社食" },
     ],
     (a, b) => [
       { name: a.name, text: "会議長くない？今日のやつ" },
       { name: b.name, text: "途中から議題なんだったか誰もわかってなかったよね" },
       { name: a.name, text: "最後「じゃあ引き続きよろしく」で終わったの最高だった" },
-      { name: b.name, text: "引き続き何をよろしくするのか誰も知らないっていう" },
     ],
     (a, b) => [
       { name: a.name, text: "エレベーター待ちのときCEOと二人きりになるの気まずい" },
       { name: b.name, text: "わかる。天気の話しかできない" },
       { name: a.name, text: "「今日暑いですね」「そうですね」で12階分もたせるの地獄" },
-      { name: b.name, text: "俺この前7階で沈黙に耐えきれなくて「あ、ここで降ります」って言っちゃった" },
-      { name: a.name, text: "7階に何もないじゃん" },
-      { name: b.name, text: "階段で戻った" },
     ],
     (a, b) => [
       { name: a.name, text: "うちの会社、何の会社なのか親に説明できない" },
       { name: b.name, text: "「IT系」って言っとけば大体なんとかなるよ" },
       { name: a.name, text: "うちフードテックなんだけど" },
       { name: b.name, text: "食のIT系で" },
-      { name: a.name, text: "親が「で、何作ってるの？」って聞くのよ" },
-      { name: b.name, text: "何作ってるんだろうな、実際" },
     ],
     (a, b) => [
       { name: a.name, text: "金曜の午後って実質もう週末だよね" },
       { name: b.name, text: "木曜の夜からそう思ってる" },
       { name: a.name, text: "早すぎて草" },
-      { name: b.name, text: "いや、でもさ。月曜の朝に「あと5日」って思う人間と、木曜の夜に「もう週末」って思う人間、どっちが幸せかって話よ" },
-      { name: a.name, text: "哲学の話やめてくれない？休憩室で" },
     ],
     (a, b) => [
       { name: a.name, text: "隣の部署の人めっちゃ電話の声でかくない？" },
       { name: b.name, text: "あの人、受話器に向かって叫んでるよね" },
-      { name: a.name, text: "でもさ、成績いいらしいよ" },
-      { name: b.name, text: "声のデカさと成績って比例するのかな" },
-      { name: a.name, text: "しないでほしい" },
+      { name: a.name, text: "テレワークの日は家族がかわいそう" },
     ],
     (a, b) => [
       { name: a.name, text: "経費精算まだ出してないんだけど" },
       { name: b.name, text: "先月分？" },
       { name: a.name, text: "3ヶ月前の" },
       { name: b.name, text: "経理に殺されるよ" },
-      { name: a.name, text: "もう殺されたい。出すのがめんどくさすぎて" },
     ],
     (a, b) => [
       { name: a.name, text: "自販機のコーヒー値上がりしてない？" },
       { name: b.name, text: "10円上がった。会社の業績と連動してる説ある" },
       { name: a.name, text: "じゃあ来月もっと上がるじゃん" },
-      { name: b.name, text: "逆に業績上がったら安くなるのかな" },
-      { name: a.name, text: "それは…ならないだろうな" },
-    ],
-    (a, b) => [
-      { name: a.name, text: "昨日帰り道にうちの会社のビル見上げたんだけどさ" },
-      { name: b.name, text: "うん" },
-      { name: a.name, text: "うちのフロアだけ電気ついてたのよ" },
-      { name: b.name, text: "残業してたもんね" },
-      { name: a.name, text: "いや、俺もう帰ってたのに" },
-      { name: b.name, text: "…誰がいたの？" },
-      { name: a.name, text: "それが怖いのよ" },
-    ],
-    (a, b) => [
-      { name: a.name, text: "なんかさ、仕事ってなんのためにしてるんだろうね" },
-      { name: b.name, text: "急にどうした" },
-      { name: a.name, text: "いや、ランチのあと毎回思うのよ" },
-      { name: b.name, text: "それ眠いだけじゃない？" },
-      { name: a.name, text: "…かもしれない" },
-    ],
-    (a, b) => [
-      { name: a.name, text: "新しいウォーターサーバー入ったの気づいた？" },
-      { name: b.name, text: "気づいた。お湯の温度が前より2度低い" },
-      { name: a.name, text: "よく気づくね" },
-      { name: b.name, text: "カップ麺の仕上がりが変わったから" },
-      { name: a.name, text: "そこで気づくのがすごいわ" },
-    ],
-    (a, b) => [
-      { name: a.name, text: "今月の目標まだ未達なんだけど" },
-      { name: b.name, text: "あと何日？" },
-      { name: a.name, text: "3日" },
-      { name: b.name, text: "奇跡を信じよう" },
-      { name: a.name, text: "奇跡に頼る経営ってどうなの" },
-      { name: b.name, text: "うちの会社、わりとそれで回ってるよ" },
     ],
   ];
 
@@ -539,9 +476,7 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: `ねえ、${c.name}さんと${b.name}さんって最近よく一緒にいない？` },
       { name: b.name, text: "え？仕事の話してるだけだけど…" },
       { name: a.name, text: "仕事の話に笑顔いらなくない？" },
-      { name: b.name, text: "いるでしょ普通に。コミュニケーションとして" },
-      { name: a.name, text: "他の人にはしないのに？" },
-      { name: b.name, text: "……この話やめていい？" },
+      { name: b.name, text: "…うるさいな" },
     ],
     (a, b) => [
       { name: a.name, text: "最近いい人いるの？" },
@@ -549,8 +484,6 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: "社内にいい人いない？" },
       { name: b.name, text: "…ノーコメントで" },
       { name: a.name, text: "いるじゃん！！！" },
-      { name: b.name, text: "いや、「いい人」の定義によるじゃん" },
-      { name: a.name, text: "その言い方がもう答えよ" },
     ],
     (a, b, c) => [
       { name: a.name, text: `${c.name}さんのこと気になってるでしょ` },
@@ -558,17 +491,13 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: "あの人が会議で発言するたびにメモ取ってるの見た" },
       { name: b.name, text: "それは普通に仕事では…？" },
       { name: a.name, text: "他の人のときはスマホいじってるくせに" },
-      { name: b.name, text: "…あの人の発言は的確だから参考になるの" },
-      { name: a.name, text: "はいはい。的確ね" },
     ],
     (a, b) => [
       { name: a.name, text: "社内恋愛ってアリ？ナシ？" },
       { name: b.name, text: "アリだと思う。出会いないし" },
       { name: a.name, text: "でもバレたら地獄だよね" },
       { name: b.name, text: "もうバレてるんだけど" },
-      { name: a.name, text: "えっ、誰と？" },
-      { name: b.name, text: "仕事と。毎日一緒にいるし、休日も考えてるし、たまに泣く" },
-      { name: a.name, text: "それはブラック企業の話じゃん" },
+      { name: a.name, text: "えっ" },
     ],
     (a, b) => [
       { name: a.name, text: "合コンセッティングしてよ" },
@@ -576,18 +505,12 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: "どんな人？" },
       { name: b.name, text: "全員うちの会社の人だけど" },
       { name: a.name, text: "それ普通の飲み会じゃん" },
-      { name: b.name, text: "でも普段話さない人と飲むのって新鮮じゃない？" },
-      { name: a.name, text: "…それはちょっとある" },
     ],
     (a, b) => [
       { name: a.name, text: "好きなタイプは？" },
       { name: b.name, text: "仕事できる人。あと面白い人" },
       { name: a.name, text: "じゃあCEOは？" },
       { name: b.name, text: "面白いけど仕事してるとこ見たことない" },
-      { name: a.name, text: "結構バッサリいくね" },
-      { name: b.name, text: "でもなんか…不思議と安心感あるよね、あの人" },
-      { name: a.name, text: "おっ？" },
-      { name: b.name, text: "おっ、じゃないよ" },
     ],
     (a, b, c) => [
       { name: a.name, text: `${c.name}さんから飲みに誘われたんだけど` },
@@ -595,18 +518,11 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: "「チームで」って言ってたけどまだ他に誰も誘ってないらしい" },
       { name: b.name, text: "それ二人じゃん。おめでとう" },
       { name: a.name, text: "おめでとうじゃないが" },
-      { name: b.name, text: "で、行くの？" },
-      { name: a.name, text: "…行く" },
-      { name: b.name, text: "おめでとう" },
     ],
     (a, b) => [
       { name: a.name, text: "バレンタイン、義理チョコ配る文化まだある？" },
       { name: b.name, text: "去年廃止になった。CEOが「めんどくさい」って" },
       { name: a.name, text: "唯一のCEOのファインプレー" },
-      { name: b.name, text: "でもさ、一個だけ届いてたよ。CEOのデスクに" },
-      { name: a.name, text: "えっ、誰から？" },
-      { name: b.name, text: "名前なかった。包装だけめちゃくちゃ丁寧だった" },
-      { name: a.name, text: "…犯人捜ししていい？" },
     ],
     (a, b, c) => [
       { name: a.name, text: `${c.name}さんのSNS見ちゃったんだけど` },
@@ -615,10 +531,6 @@ function generateBreakroomChats(subs, companies) {
       { name: b.name, text: "で？" },
       { name: a.name, text: "なんかオシャレなカフェの写真ばっかりで…ちょっとキュンとした" },
       { name: b.name, text: "重症だね" },
-      { name: a.name, text: "あとさ、たまに空の写真載せてるのよ。夕焼けとか" },
-      { name: b.name, text: "うん" },
-      { name: a.name, text: "なんかそれ見て、ああこの人もこういう空見て綺麗って思うんだなって" },
-      { name: b.name, text: "…完全に恋じゃん" },
     ],
     (a, b) => [
       { name: a.name, text: "職場で告白した人いる？この会社で" },
@@ -626,33 +538,12 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: "結果は？" },
       { name: b.name, text: "二人とも翌月転職した" },
       { name: a.name, text: "壮大な共倒れ" },
-      { name: b.name, text: "でも二人とも同じ会社に行ったらしいよ" },
-      { name: a.name, text: "…ちょっと、いい話じゃん" },
     ],
     (a, b) => [
       { name: a.name, text: "最近残業ばっかりで出会いがない" },
       { name: b.name, text: "残業中に隣で仕事してる人と仲良くなるパターンあるよ" },
       { name: a.name, text: "隣の席、CEOなんだけど" },
       { name: b.name, text: "がんばれ" },
-      { name: a.name, text: "がんばれって何を" },
-    ],
-    (a, b, c) => [
-      { name: a.name, text: `なんか${c.name}さん、最近雰囲気変わったよね` },
-      { name: b.name, text: "あー、わかる。なんか柔らかくなった" },
-      { name: a.name, text: "恋してるんじゃない？" },
-      { name: b.name, text: "それか新しいシャンプーか" },
-      { name: a.name, text: "シャンプーで雰囲気変わる？" },
-      { name: b.name, text: "変わるよ。俺は変わった" },
-      { name: a.name, text: "…変わってないけど" },
-    ],
-    (a, b) => [
-      { name: a.name, text: "もしさ、社内の誰かと付き合えるとしたら誰がいい？" },
-      { name: b.name, text: "難しいな…仕事とプライベートは分けたい派なんだけど" },
-      { name: a.name, text: "わかる。でも仮定の話として" },
-      { name: b.name, text: "仮定ね…うん、仮定ね" },
-      { name: a.name, text: "今めっちゃ具体的に考えたでしょ" },
-      { name: b.name, text: "考えてない" },
-      { name: a.name, text: "3秒黙ったけど" },
     ],
   ];
 
@@ -661,67 +552,32 @@ function generateBreakroomChats(subs, companies) {
       { name: a.name, text: `${b.name}さん、今日もなんかやらかしてた？` },
       { name: b.name, text: "コピー機壊した。3台目" },
       { name: a.name, text: "才能だよそれ" },
-      { name: b.name, text: "でもさ、壊すたびに構造に詳しくなってきた" },
-      { name: a.name, text: "成長の方向がおかしいのよ" },
     ] : null,
     (a, b) => b.trait.name === "野心家" ? [
       { name: a.name, text: `${b.name}さん、またCEOに直談判してたね` },
       { name: b.name, text: "自分のビジョンを伝えないと始まらないからね" },
       { name: a.name, text: "CEOめっちゃ困った顔してたけど" },
-      { name: b.name, text: "あれは「困った」じゃなくて「感心してる」顔だと思う" },
-      { name: a.name, text: "ポジティブすぎない？" },
     ] : null,
     (a, b) => b.trait.name === "運だけ男" ? [
       { name: a.name, text: `${b.name}さんってなんであんな成績出せるの` },
       { name: b.name, text: "俺もわかんない" },
       { name: a.name, text: "正直で草" },
-      { name: b.name, text: "なんかさ、困ったら右を選ぶことにしてるのよ" },
-      { name: a.name, text: "経営判断それでいいの？" },
-      { name: b.name, text: "今のところいける" },
     ] : null,
     (a, b) => b.mood < 30 ? [
       { name: a.name, text: `${b.name}さん最近元気なくない？` },
       { name: b.name, text: "…別に" },
       { name: a.name, text: "目が死んでるよ。昨日より" },
-      { name: b.name, text: "…昨日と比較してるんだ" },
-      { name: a.name, text: "毎日見てるからね、隣の席だし" },
-      { name: b.name, text: "…ありがとう" },
     ] : null,
     (a, b) => b.trait.name === "カリスマ" ? [
       { name: a.name, text: `${b.name}さんの周りだけ雰囲気違うよね` },
       { name: b.name, text: "そう？普通にしてるだけだよ" },
       { name: a.name, text: "その「普通」ができないから皆苦労してるんだよ" },
-      { name: b.name, text: "でもさ、俺だって家帰ったら何もできないよ。洗い物とか溜まってるし" },
-      { name: a.name, text: "カリスマの生活感いらないんだけど" },
     ] : null,
     (a, b) => b.trait.name === "職人気質" ? [
       { name: a.name, text: `${b.name}さん、あの資料まだ？` },
       { name: b.name, text: "フォントを選んでる" },
       { name: a.name, text: "中身は？" },
       { name: b.name, text: "まだ" },
-      { name: a.name, text: "フォントより中身が先では" },
-      { name: b.name, text: "フォントが決まらないと中身が書けない。器が先、中身はあと" },
-      { name: a.name, text: "一理ある…のか？" },
-    ] : null,
-    (a, b) => b.trait.name === "理論派" ? [
-      { name: a.name, text: `${b.name}さんってさ、飲み会でも数字の話するよね` },
-      { name: b.name, text: "この前の二次会の一人当たり単価、適正じゃなかったから" },
-      { name: a.name, text: "飲み会に適正単価とかある？" },
-      { name: b.name, text: "ある。データで出せる" },
-    ] : null,
-    (a, b) => b.trait.name === "人たらし" ? [
-      { name: a.name, text: `${b.name}さんって取引先の人に好かれすぎじゃない？` },
-      { name: b.name, text: "そうかな。普通に話してるだけだよ" },
-      { name: a.name, text: "先方の担当者、この前お土産持ってきてたよ。個人的に" },
-      { name: b.name, text: "あれは…まあ、相手のペットの誕生日覚えてただけで" },
-      { name: a.name, text: "それができるのがおかしいのよ" },
-    ] : null,
-    (a, b) => b.trait.name === "破天荒" ? [
-      { name: a.name, text: `${b.name}さん、来月の企画書見た？` },
-      { name: b.name, text: "あ、あれね。ちょっと攻めた" },
-      { name: a.name, text: "「ちょっと」じゃないでしょ。予算3倍で提出してたよ" },
-      { name: b.name, text: "でもリターンも3倍でしょ。たぶん" },
-      { name: a.name, text: "「たぶん」で3倍の予算取りにいくの怖すぎる" },
     ] : null,
   ];
 
@@ -874,21 +730,6 @@ function SubordinateCard({ sub, companies, expanded, onToggle }) {
               </div>
             ))}
           </div>
-
-          {/* History */}
-          {sub.history && sub.history.length > 0 && (
-            <div style={{ marginTop: 10, paddingTop: 8, borderTop: "1px solid #1a1828" }}>
-              <div style={{ fontSize: 10, color: "#5a4a3a", letterSpacing: 1, marginBottom: 6 }}>社内履歴</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                {sub.history.map((h, i) => (
-                  <div key={i} style={{ display: "flex", gap: 8, alignItems: "start", fontSize: 10 }}>
-                    <span style={{ color: "#4a4a3a", minWidth: 54, flexShrink: 0 }}>{turnToDate(h.turn)}</span>
-                    <span style={{ color: "#7a6a5a" }}>{h.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -939,7 +780,6 @@ export default function ConglomerateCEO() {
       manager: null, health: 100, cost,
       stats: { tech: 10 + rand(0, 15), brand: 5 + rand(0, 10), share: 5 + rand(0, 10), org: 10 + rand(0, 10) },
       profitHistory: [],
-      chronicle: [{ turn, text: "設立" }],
     };
     setCompanies(p => [...p, comp]);
     setMoney(p => p - cost);
@@ -948,25 +788,14 @@ export default function ConglomerateCEO() {
   };
 
   const assignManager = (companyId, subId) => {
-    const comp = companies.find(c => c.id === companyId);
-    const sub = subordinates.find(s => s.id === subId);
-    setSubordinates(p => p.map(s => {
-      if (s.id === subId) return { ...s, assigned: companyId, history: [...(s.history || []), { turn, text: `${comp?.name || ""}に配属` }] };
-      if (s.assigned === companyId) return { ...s, assigned: null, history: [...(s.history || []), { turn, text: "配属解除" }] };
-      return s;
-    }));
-    if (comp) {
-      setCompanies(p => p.map(c => c.id === companyId ? { ...c, chronicle: [...(c.chronicle || []), { turn, text: `${sub?.name || ""}を責任者に任命` }] } : c));
-    }
+    setSubordinates(p => p.map(s =>
+      s.id === subId ? { ...s, assigned: companyId } : s.assigned === companyId ? { ...s, assigned: null } : s
+    ));
     setShowAssignModal(null);
   };
 
   const removeManager = (companyId) => {
-    const mgr = subordinates.find(s => s.assigned === companyId);
-    setSubordinates(p => p.map(s => s.assigned === companyId ? { ...s, assigned: null, history: [...(s.history || []), { turn, text: "配属解除" }] } : s));
-    if (mgr) {
-      setCompanies(p => p.map(c => c.id === companyId ? { ...c, chronicle: [...(c.chronicle || []), { turn, text: `${mgr.name}が離任` }] } : c));
-    }
+    setSubordinates(p => p.map(s => s.assigned === companyId ? { ...s, assigned: null } : s));
   };
 
   const sellCompany = (companyId) => {
@@ -975,7 +804,7 @@ export default function ConglomerateCEO() {
     const val = Math.max(1000000, Math.floor(comp.health * 30000 + comp.totalProfit * 0.3));
     setMoney(p => p + val);
     setCompanies(p => p.filter(c => c.id !== companyId));
-    setSubordinates(p => p.map(s => s.assigned === companyId ? { ...s, assigned: null, history: [...(s.history || []), { turn, text: `${comp.name}売却に伴い配属解除` }] } : s));
+    setSubordinates(p => p.map(s => s.assigned === companyId ? { ...s, assigned: null } : s));
     setTurnLog(p => [...p, `📤 ${comp.name}を${formatMoney(val)}円で売却`]);
   };
 
@@ -999,12 +828,9 @@ export default function ConglomerateCEO() {
   const rejectHeadhunt = () => {
     if (!headhuntOffer) return;
     const { target } = headhuntOffer;
+    // Rejecting boosts loyalty slightly
     setSubordinates(p => p.map(s =>
-      s.id === target.id ? {
-        ...s, mood: Math.min(100, s.mood + 5),
-        stats: { ...s.stats, loyalty: Math.min(99, s.stats.loyalty + 5) },
-        history: [...(s.history || []), { turn, text: `引き抜きを断ってもらえた` }],
-      } : s
+      s.id === target.id ? { ...s, mood: Math.min(100, s.mood + 5), stats: { ...s.stats, loyalty: Math.min(99, s.stats.loyalty + 5) } } : s
     ));
     setTurnLog(p => [...p, `🤝 ${target.name}の引き抜きを断った。${target.name}の忠誠心が上がった`]);
     setHeadhuntOffer(null);
@@ -1071,17 +897,9 @@ export default function ConglomerateCEO() {
 
       const newHistory = [...(comp.profitHistory || []), profit].slice(-24);
 
-      // Chronicle events
-      const chron = [...(comp.chronicle || [])];
-      const oldRank = companyRank(comp.stats || { tech: 10, brand: 10, share: 10, org: 10 });
-      const newRank = companyRank(st);
-      if (newRank.tier > oldRank.tier) chron.push({ turn, text: `${newRank.title}に昇格` });
-      if (comp.totalProfit <= 0 && comp.totalProfit + profit > 0) chron.push({ turn, text: "累計損益が初めて黒字に" });
-      if (hp < 30 && comp.health >= 30) chron.push({ turn, text: "経営危機に陥る" });
-
       totalRev += profit;
       log.push(`${profit > 0 ? "📈" : "📉"} ${comp.name}: ${profit > 0 ? "+" : ""}${formatMoney(profit)}円 (体力${hp})`);
-      return { ...comp, revenue: profit, totalProfit: comp.totalProfit + profit, health: hp, stats: st, profitHistory: newHistory, chronicle: chron };
+      return { ...comp, revenue: profit, totalProfit: comp.totalProfit + profit, health: hp, stats: st, profitHistory: newHistory };
     });
 
     const surviving = [];
@@ -1091,9 +909,6 @@ export default function ConglomerateCEO() {
         setSubordinates(p => p.map(s => s.assigned === comp.id ? { ...s, assigned: null } : s));
       } else surviving.push(comp);
     });
-
-    // Track company chronicle additions from sub events
-    const companyChronicleAdds = [];
 
     setSubordinates(prev => {
       let updated = prev.map(sub => {
@@ -1119,7 +934,6 @@ export default function ConglomerateCEO() {
             const msg = BETRAYAL_MSGS[Math.floor(Math.random() * BETRAYAL_MSGS.length)];
             log.push(`🗡️ ${sub.name}が裏切った！「${rivalName}」を設立して独立！`);
             log.push(`　　─ ${msg}`);
-            companyChronicleAdds.push({ companyId: comp.id, entry: { turn, text: `${sub.name}が裏切り、「${rivalName}」を設立して独立` } });
             setRivals(r => [...r, {
               id: Date.now() + Math.random(),
               name: rivalName,
@@ -1140,21 +954,11 @@ export default function ConglomerateCEO() {
       }).filter(Boolean);
       if (Math.random() < 0.25) {
         const ns = generateSubordinate(subIdRef.current++);
-        ns.history = [{ turn, text: "入社" }];
         log.push(`👤 新人材「${ns.name}」(${ns.trait.name})が応募してきた`);
         updated = [...updated, ns];
       }
       return updated;
     });
-
-    // Apply company chronicle additions from betrayal events
-    if (companyChronicleAdds.length > 0) {
-      setCompanies(p => p.map(c => {
-        const adds = companyChronicleAdds.filter(a => a.companyId === c.id);
-        if (adds.length === 0) return c;
-        return { ...c, chronicle: [...(c.chronicle || []), ...adds.map(a => a.entry)] };
-      }));
-    }
 
     // Process rivals: they compete with your companies and may die
     setRivals(prev => {
@@ -1643,26 +1447,6 @@ export default function ConglomerateCEO() {
                 <div><span style={{ color: "#6a5a4a" }}>累計 </span><span style={{ color: comp.totalProfit >= 0 ? "#88aa88" : "#aa6666", fontWeight: 700 }}>{comp.totalProfit >= 0 ? "+" : ""}{formatMoney(comp.totalProfit)}円</span></div>
               </div>
             </div>
-
-            {/* Chronicle */}
-            {comp.chronicle && comp.chronicle.length > 0 && (
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "#6a5a4a", letterSpacing: 2, marginBottom: 8 }}>沿革</div>
-                <div style={{
-                  background: "#0e0c14", borderRadius: 8, padding: "10px 12px",
-                  borderLeft: "2px solid #2a2040",
-                }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    {comp.chronicle.map((c, i) => (
-                      <div key={i} style={{ display: "flex", gap: 10, alignItems: "start", fontSize: 11 }}>
-                        <span style={{ color: "#4a4a3a", minWidth: 60, flexShrink: 0 }}>{turnToDate(c.turn)}</span>
-                        <span style={{ color: "#8a7a6a" }}>{c.text}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Rivals */}
             {compRivals.length > 0 && (
