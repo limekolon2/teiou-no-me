@@ -1,21 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 const INDUSTRIES = [
-  { id: "ai", name: "AI・機械学習", icon: "🤖", volatility: 0.35, baseTrend: 0.005 },
-  { id: "ev", name: "EV・電動モビリティ", icon: "⚡", volatility: 0.3, baseTrend: 0.003 },
-  { id: "space", name: "宇宙開発", icon: "🚀", volatility: 0.4, baseTrend: 0.0 },
-  { id: "biotech", name: "バイオテクノロジー", icon: "🧬", volatility: 0.35, baseTrend: 0.002 },
-  { id: "metaverse", name: "メタバース・XR", icon: "🥽", volatility: 0.4, baseTrend: -0.01 },
-  { id: "fintech", name: "フィンテック", icon: "💳", volatility: 0.25, baseTrend: -0.003 },
-  { id: "greentech", name: "環境・クリーンエネルギー", icon: "🌱", volatility: 0.3, baseTrend: 0.005 },
-  { id: "food", name: "フードテック", icon: "🍔", volatility: 0.2, baseTrend: 0.0 },
-  { id: "security", name: "サイバーセキュリティ", icon: "🛡️", volatility: 0.25, baseTrend: 0.003 },
-  { id: "drone", name: "ドローン・ロボティクス", icon: "🦾", volatility: 0.3, baseTrend: 0.002 },
-  { id: "medical", name: "デジタル医療", icon: "🏥", volatility: 0.3, baseTrend: 0.003 },
-  { id: "realestate", name: "不動産テック", icon: "🏢", volatility: 0.2, baseTrend: -0.005 },
-  { id: "gaming", name: "ゲーム・eスポーツ", icon: "🎮", volatility: 0.3, baseTrend: 0.0 },
-  { id: "logistics", name: "物流DX", icon: "📦", volatility: 0.2, baseTrend: 0.002 },
-  { id: "edu", name: "EdTech", icon: "📚", volatility: 0.2, baseTrend: -0.002 },
+  { id: "ai", name: "AI・機械学習", icon: "🤖", volatility: 0.35, baseTrend: 0.005, baseCompetition: 0.8 },
+  { id: "ev", name: "EV・電動モビリティ", icon: "⚡", volatility: 0.3, baseTrend: 0.003, baseCompetition: 0.7 },
+  { id: "space", name: "宇宙開発", icon: "🚀", volatility: 0.4, baseTrend: 0.0, baseCompetition: 0.3 },
+  { id: "biotech", name: "バイオテクノロジー", icon: "🧬", volatility: 0.35, baseTrend: 0.002, baseCompetition: 0.5 },
+  { id: "metaverse", name: "メタバース・XR", icon: "🥽", volatility: 0.4, baseTrend: -0.01, baseCompetition: 0.6 },
+  { id: "fintech", name: "フィンテック", icon: "💳", volatility: 0.25, baseTrend: -0.003, baseCompetition: 0.8 },
+  { id: "greentech", name: "環境・クリーンエネルギー", icon: "🌱", volatility: 0.3, baseTrend: 0.005, baseCompetition: 0.5 },
+  { id: "food", name: "フードテック", icon: "🍔", volatility: 0.2, baseTrend: 0.0, baseCompetition: 0.7 },
+  { id: "security", name: "サイバーセキュリティ", icon: "🛡️", volatility: 0.25, baseTrend: 0.003, baseCompetition: 0.6 },
+  { id: "drone", name: "ドローン・ロボティクス", icon: "🦾", volatility: 0.3, baseTrend: 0.002, baseCompetition: 0.4 },
+  { id: "medical", name: "デジタル医療", icon: "🏥", volatility: 0.3, baseTrend: 0.003, baseCompetition: 0.5 },
+  { id: "realestate", name: "不動産テック", icon: "🏢", volatility: 0.2, baseTrend: -0.005, baseCompetition: 0.7 },
+  { id: "gaming", name: "ゲーム・eスポーツ", icon: "🎮", volatility: 0.3, baseTrend: 0.0, baseCompetition: 0.8 },
+  { id: "logistics", name: "物流DX", icon: "📦", volatility: 0.2, baseTrend: 0.002, baseCompetition: 0.6 },
+  { id: "edu", name: "EdTech", icon: "📚", volatility: 0.2, baseTrend: -0.002, baseCompetition: 0.4 },
 ];
 
 // Each industry values different stats (weights must sum to ~1.0)
@@ -85,9 +85,74 @@ function pickCompanyName(industryId) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-const LAST_NAMES = ["田中","鈴木","佐藤","山田","渡辺","伊藤","中村","高橋","小林","加藤","松本","井上","木村","林","清水","山口","斎藤","森","池田","橋本","藤田","岡田","後藤","長谷川","村上","近藤","石川","前田","遠藤","青木"];
-const FIRST_NAMES_M = ["翔太","大輝","健一","拓也","雄介","直樹","亮","誠","隆","浩二","修","悟","慎一","裕也","達也"];
-const FIRST_NAMES_F = ["美咲","さくら","葵","陽菜","結衣","彩","真由","麻衣","千尋","涼子","恵","綾","瞳","玲奈","杏"];
+const SYNERGIES = [
+  { a: "space", b: "food", name: "宇宙農業計画", desc: "宇宙で食料を生産する壮大な計画", bonus: 0.25 },
+  { a: "gaming", b: "medical", name: "ゲーミフィケーション治療", desc: "遊びながら治す次世代医療", bonus: 0.25 },
+  { a: "realestate", b: "metaverse", name: "仮想不動産帝国", desc: "現実より高い仮想の土地", bonus: 0.3 },
+  { a: "drone", b: "greentech", name: "空中植林プロジェクト", desc: "ドローンが種を蒔く未来の森林再生", bonus: 0.25 },
+  { a: "biotech", b: "food", name: "培養肉プロジェクト", desc: "牧場のいらない食卓", bonus: 0.25 },
+  { a: "fintech", b: "space", name: "宇宙保険事業", desc: "隕石衝突もカバーします", bonus: 0.3 },
+  { a: "edu", b: "gaming", name: "遊んで学ぶ学校", desc: "宿題がクエストになった", bonus: 0.25 },
+  { a: "ai", b: "medical", name: "AI主治医プロジェクト", desc: "診断精度は人間を超えた。でも注射は打てない", bonus: 0.25 },
+  { a: "ev", b: "logistics", name: "無人配送ネットワーク", desc: "届け先に人がいないことだけが問題", bonus: 0.25 },
+  { a: "security", b: "fintech", name: "量子暗号バンキング", desc: "解読に宇宙の寿命が必要な金庫", bonus: 0.3 },
+  { a: "metaverse", b: "edu", name: "バーチャル留学", desc: "自室から世界中の教室へ", bonus: 0.25 },
+  { a: "ai", b: "greentech", name: "地球シミュレーター", desc: "AIが気候変動の未来を予測する", bonus: 0.25 },
+];
+
+const INDUSTRY_SUFFIX = {
+  ai: ["AI研究所","テクノロジーズ","インテリジェンス","ラボ"],
+  ev: ["モビリティ","モーターズ","EV","ドライブ"],
+  space: ["スペース","アストロ","コスモ","オービタル"],
+  biotech: ["バイオ","ライフサイエンス","ゲノミクス","ファーマ"],
+  metaverse: ["デジタル","XR","バーチャル","メタ"],
+  fintech: ["ファイナンス","ペイメント","キャピタル","マネー"],
+  greentech: ["エナジー","グリーン","エコ","クリーン"],
+  food: ["フーズ","キッチン","ダイニング","テイスト"],
+  security: ["セキュリティ","ガード","シールド","プロテクト"],
+  drone: ["ロボティクス","エアロ","フライト","テック"],
+  medical: ["メディカル","ヘルス","ケア","クリニカル"],
+  realestate: ["プロパティ","ハウジング","リアルティ","アーバン"],
+  gaming: ["ゲームズ","エンタメ","プレイ","スタジオ"],
+  logistics: ["ロジスティクス","エクスプレス","カーゴ","デリバリー"],
+  edu: ["アカデミー","エデュケーション","ラーニング","スクール"],
+};
+
+function groupCompanyName(gName, industryId) {
+  const suffixes = INDUSTRY_SUFFIX[industryId] || ["事業部"];
+  const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+  return `${gName} ${suffix}`;
+}
+
+const DEFAULT_GROUP_NAMES = ["ノヴァ","アトラス","ゼノン","暁","黒鉄","アルカディア","蒼天","ヴァルハラ","オリオン","紅蓮"];
+
+const CHARACTER_ROSTER = [
+  // Male
+  { name: "田中 翔太", gender: "M" }, { name: "鈴木 大輝", gender: "M" },
+  { name: "佐藤 健一", gender: "M" }, { name: "山田 拓也", gender: "M" },
+  { name: "渡辺 雄介", gender: "M" }, { name: "中村 直樹", gender: "M" },
+  { name: "高橋 亮", gender: "M" }, { name: "小林 誠", gender: "M" },
+  { name: "加藤 隆", gender: "M" }, { name: "松本 浩二", gender: "M" },
+  { name: "井上 修", gender: "M" }, { name: "木村 悟", gender: "M" },
+  { name: "林 慎一", gender: "M" }, { name: "山口 裕也", gender: "M" },
+  { name: "斎藤 達也", gender: "M" }, { name: "森 拓海", gender: "M" },
+  { name: "池田 龍之介", gender: "M" }, { name: "近藤 大地", gender: "M" },
+  { name: "石川 蓮", gender: "M" }, { name: "後藤 和也", gender: "M" },
+  // Female
+  { name: "橋本 美咲", gender: "F" }, { name: "藤田 さくら", gender: "F" },
+  { name: "岡田 葵", gender: "F" }, { name: "長谷川 陽菜", gender: "F" },
+  { name: "村上 結衣", gender: "F" }, { name: "前田 彩", gender: "F" },
+  { name: "遠藤 真由", gender: "F" }, { name: "青木 麻衣", gender: "F" },
+  { name: "清水 千尋", gender: "F" }, { name: "伊藤 涼子", gender: "F" },
+  { name: "中島 恵", gender: "F" }, { name: "吉田 綾", gender: "F" },
+  { name: "西村 瞳", gender: "F" }, { name: "三浦 玲奈", gender: "F" },
+  { name: "原田 杏", gender: "F" }, { name: "野口 花", gender: "F" },
+  { name: "松田 凛", gender: "F" }, { name: "上田 紗希", gender: "F" },
+  { name: "柴田 七海", gender: "F" }, { name: "内田 ひなた", gender: "F" },
+  { name: "川口 音葉", gender: "F" }, { name: "安藤 詩月", gender: "F" },
+  { name: "望月 波音", gender: "F" }, { name: "白石 月葉", gender: "F" },
+  { name: "沢村 結", gender: "F" },
+];
 const TRAITS = [
   { name: "天才肌", desc: "閃きで突破する。ハマれば無双、外すと大惨事", color: "#ffaa00" },
   { name: "堅実", desc: "地味だが確実。大勝ちしないが大負けもしない", color: "#66aa66" },
@@ -148,23 +213,40 @@ const CLUBS = [
 function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
+const usedRosterNames = new Set();
+
 function generateSubordinate(id) {
-  const isFemale = Math.random() < 0.4;
-  const last = LAST_NAMES[rand(0, LAST_NAMES.length - 1)];
-  const first = isFemale ? FIRST_NAMES_F[rand(0, FIRST_NAMES_F.length - 1)] : FIRST_NAMES_M[rand(0, FIRST_NAMES_M.length - 1)];
+  // Pick from roster, avoiding already-used names
+  const available = CHARACTER_ROSTER.filter(c => !usedRosterNames.has(c.name));
+  let char;
+  if (available.length > 0) {
+    char = available[Math.floor(Math.random() * available.length)];
+  } else {
+    // All used - reset and pick again
+    usedRosterNames.clear();
+    char = CHARACTER_ROSTER[Math.floor(Math.random() * CHARACTER_ROSTER.length)];
+  }
+  usedRosterNames.add(char.name);
+
+  const isFemale = char.gender === "F";
   const trait = TRAITS[rand(0, TRAITS.length - 1)];
   const age = 25 + Math.floor(Math.random() * 30);
   const quirk = QUIRKS[rand(0, QUIRKS.length - 1)];
   const club = CLUBS[rand(0, CLUBS.length - 1)];
 
-  let leadership = rand(15, 85);
-  let execution = rand(15, 85);
-  let creativity = rand(15, 85);
-  let negotiation = rand(15, 85);
-  let stamina = rand(20, 90);
+  let leadership = rand(10, 45);
+  let execution = rand(10, 45);
+  let creativity = rand(10, 45);
+  let negotiation = rand(10, 45);
+  let stamina = rand(15, 55);
   let luck = rand(5, 95);
-  let loyalty = rand(20, 90);
-  let ambition = rand(10, 95);
+  let loyalty = rand(30, 80);
+  let ambition = rand(10, 70);
+
+  // Growth tendencies: 2 stats grow fast, 1 grows slow
+  const growableStats = ["leadership", "execution", "creativity", "negotiation", "stamina"];
+  const shuffled = [...growableStats].sort(() => Math.random() - 0.5);
+  const growthTendency = { fast: [shuffled[0], shuffled[1]], slow: shuffled[4] };
 
   // Club bonus
   const statMap = { leadership, execution, creativity, negotiation, stamina, luck, loyalty, ambition };
@@ -210,10 +292,11 @@ function generateSubordinate(id) {
   const salary = Math.round((overall * 60 + rand(1500, 3000)) * 1000);
 
   return {
-    id, name: `${last} ${first}`, gender: isFemale ? "F" : "M",
+    id, name: char.name, gender: char.gender,
     age, trait, quirk, club, stats, overall, salary,
     assigned: null, turnsWorked: 0, mood: 70 + rand(-10, 10),
     history: [],
+    growthTendency,
   };
 }
 
@@ -302,6 +385,79 @@ const BETRAYAL_MSGS = [
   "社員証を返却するとき、少しだけ手が止まった。それが唯一の迷いだった",
   "後日、元同僚に「あの会社にいた時間は無駄じゃなかった」と言っていたらしい。なぜ直接言わないのか",
 ];
+
+const RIVAL_DEFEAT_MSGS = [
+  "最後の日、元社員はうちのビルを見上げていたらしい。しばらく動かなかったと、警備員が言っていた",
+  "「負けました」。その一言だけのメールが届いた。返信はしなかった。する必要もなかった",
+  "元社員のデスクには、うちの会社にいた頃の写真が一枚だけ残っていたらしい",
+  "元社員は最後まで「自分は間違っていなかった」と言っていたそうだ。でも数字は嘘をつかない",
+  "潰れる前日、元社員がうちの社食に来ていた。何を食べたかは、誰も覚えていない",
+  "「出ていくべきじゃなかった」と呟いたらしい。聞いた人間は、何も言えなかった",
+  "取引先から「元部下の会社、潰れたらしいですね」と言われた。「そうですか」としか返せなかった",
+  "会社を畳んだあと、元社員は3日間連絡が取れなかったらしい。4日目に「大丈夫です」とだけ返信があった",
+];
+
+const RIVAL_RETURN_MSGS = [
+  "「…もう一度、やらせてください」。その目は、出ていったときより少しだけ大人になっていた",
+  "「外で学んだことがあります。全部、ここで使わせてください」",
+  "何も言わずに、かつての自分のデスクの前に立っていた。椅子はまだ空いていた",
+  "「帰ってきました」。それだけ言って、翌日から普通に出社した",
+  "「独立して初めてわかりました。ここがどれだけ恵まれていたか」",
+];
+
+const EMPLOYEE_VOICES = {
+  champion: [
+    [{ s: "A", text: "最近さ、友達に会社どこって聞かれるの嬉しいんだよね" }, { s: "B", text: "わかる。前は説明しづらかったけど、今は名前出すだけで伝わる" }],
+    [{ s: "A", text: "後輩がさ、うちに入りたいって言ってくれたのよ" }, { s: "B", text: "いい会社になったよね。…いつの間にか" }],
+    [{ s: "A", text: "転職サイト、最近開いてないな" }, { s: "B", text: "あー、私も。いつからだろ" }, { s: "A", text: "たぶんこの会社が好きになった頃から" }],
+    [{ s: "A", text: "なんかさ、月曜がそんなに嫌じゃなくなった" }, { s: "B", text: "それって結構すごいことだよね" }, { s: "A", text: "うん。この会社に入って一番の変化かも" }],
+    [{ s: "A", text: "取引先に「いい会社にお勤めですね」って言われた" }, { s: "B", text: "社交辞令じゃなくて？" }, { s: "A", text: "目が本気だった" }],
+    [{ s: "A", text: "うちの会社のロゴ、最近好きになってきた" }, { s: "B", text: "わかる。名刺出すとき胸張れるようになったよね" }],
+  ],
+  growing: [
+    [{ s: "A", text: "最近なんかいい雰囲気じゃない？うち" }, { s: "B", text: "わかる。朝来るのそんなに嫌じゃなくなった" }, { s: "A", text: "「そんなに」ってなんだよ" }],
+    [{ s: "A", text: "今月もいけそうだね" }, { s: "B", text: "なんか最近、数字見るの楽しくなってきた" }, { s: "A", text: "やばいね。仕事楽しんでる" }],
+    [{ s: "A", text: "この会社、入ったときと全然違うよね" }, { s: "B", text: "うん。最初は大丈夫かなって思ってたけど" }, { s: "A", text: "今は大丈夫じゃないときのほうが少ないもんね" }],
+    [{ s: "A", text: "なんか最近、残業が苦じゃなくなった" }, { s: "B", text: "それ危ないやつじゃない？" }, { s: "A", text: "いや、ちゃんと帰ってるよ。ただ帰りたくない日もあるってだけ" }],
+    [{ s: "A", text: "今年の目標、もう達成しちゃいそう" }, { s: "B", text: "上方修正されるやつじゃん" }, { s: "A", text: "…やめて" }],
+  ],
+  comfortable: [
+    [{ s: "A", text: "なんかさ、最近仕事のあとに料理するようになったのよ" }, { s: "B", text: "余裕あるね。前は帰ったら死んでたのに" }, { s: "A", text: "会社が安定してると心にも余裕出るんだなって" }],
+    [{ s: "A", text: "来月有給取って旅行行こうかなって" }, { s: "B", text: "いいじゃん。前は有給取れる雰囲気じゃなかったもんね" }, { s: "A", text: "今は「行ってらっしゃい」って言ってもらえる会社になった" }],
+    [{ s: "A", text: "週末、趣味の時間が増えたのよ" }, { s: "B", text: "前は週末も仕事のこと考えてたもんね" }, { s: "A", text: "今は金曜の夜に「やった週末だ」って思える。それだけで幸せ" }],
+    [{ s: "A", text: "友達に「最近なんかいい顔してるね」って言われた" }, { s: "B", text: "仕事が安定してるとそうなるよ" }, { s: "A", text: "顔に出るんだね。会社の調子って" }],
+    [{ s: "A", text: "新人入ってきたら優しくしてあげたいよね" }, { s: "B", text: "うちらが苦労した分、あの子たちにはいい環境で働いてほしい" }, { s: "A", text: "…先輩っぽいこと言うじゃん" }, { s: "B", text: "先輩だからね" }],
+    [{ s: "A", text: "なんかさ、うちの会社のこと好きだなって最近思うのよ" }, { s: "B", text: "急にどうした" }, { s: "A", text: "いや、特に理由はないんだけど。なんとなく" }, { s: "B", text: "…それが一番いい理由かもね" }],
+  ],
+  stable: [
+    [{ s: "A", text: "今日も平和だね" }, { s: "B", text: "平和が一番よ" }, { s: "A", text: "…それはそうなんだけど、たまに刺激ほしくない？" }, { s: "B", text: "ない" }],
+    [{ s: "A", text: "うちの会社の好きなとこある？" }, { s: "B", text: "社食のカレー" }, { s: "A", text: "仕事の話してくれない？" }],
+    [{ s: "A", text: "可もなく不可もなくってうちのことだよね" }, { s: "B", text: "不可がないの大事だよ。前の会社不可しかなかったから" }],
+  ],
+  struggling: [
+    [{ s: "A", text: "今月どうなんだろ…" }, { s: "B", text: "考えても仕方ないよ。やることやるだけ" }, { s: "A", text: "…それはそうなんだけどさ" }],
+    [{ s: "A", text: "隣の部署の人、最近元気ないよね" }, { s: "B", text: "うちの業績知ってたらそうなるよ" }, { s: "A", text: "…知ってんだ、みんな" }],
+    [{ s: "A", text: "忙しいのに数字出ないのキツいよね" }, { s: "B", text: "でもさ、やめたいかって言われたらそうでもないのよ" }, { s: "A", text: "…わかる。なんだかんだ愛着あるんだよね" }],
+  ],
+  crisis: [
+    [{ s: "A", text: "ねえ、ボーナス出るのかな" }, { s: "B", text: "…聞かないほうがいいと思う" }],
+    [{ s: "A", text: "最近CEOと目が合うと怖いんだよね" }, { s: "B", text: "売却されるかもって思ってるんでしょ" }, { s: "A", text: "思ってないけど。…思ってないけど" }],
+    [{ s: "A", text: "うち大丈夫かな" }, { s: "B", text: "大丈夫だよ。…たぶん" }, { s: "A", text: "その「たぶん」が怖いのよ" }],
+    [{ s: "A", text: "もしうちが潰れたらどうする？" }, { s: "B", text: "考えたくないけど…でもここで出会えた人たちは財産だと思う" }, { s: "A", text: "…急にいいこと言うじゃん" }],
+  ],
+};
+
+function getEmployeeVoice(comp) {
+  const rank = companyRank(comp.stats || { tech: 10, brand: 10, share: 10, org: 10 });
+  let pool;
+  if (rank.tier >= 5) pool = EMPLOYEE_VOICES.champion;
+  else if (comp.health < 30) pool = EMPLOYEE_VOICES.crisis;
+  else if (comp.revenue < 0 && comp.health < 60) pool = EMPLOYEE_VOICES.struggling;
+  else if (rank.tier >= 4 && comp.revenue >= 0) pool = EMPLOYEE_VOICES.comfortable;
+  else if (comp.revenue > 0 && rank.tier >= 3) pool = EMPLOYEE_VOICES.growing;
+  else pool = EMPLOYEE_VOICES.stable;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 const HEADHUNT_ORGS = [
   "ブラックロック・キャピタル","ノヴァ・グループ","ゴールデンイーグル・ホールディングス",
@@ -421,15 +577,70 @@ function pickComment(sub, compRevenue) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function generateBreakroomChats(subs, companies) {
+function generateBreakroomChats(subs, companies, currentTurn) {
   const chats = [];
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   // Wrap subs with last-name-only and gender marker
   const wrap = (s) => ({ ...s, name: s.name.split(" ")[0], fullName: s.name });
+
+  const currentMonth = ((4 - 1 + (currentTurn || 1) - 1) % 12) + 1;
+
+  const SEASONAL_CHAT = {
+    1: [(a, b) => [
+      { name: a.name, text: "あけおめ。今年の目標ある？" },
+      { name: b.name, text: "「定時退社」って毎年書いてる" },
+      { name: a.name, text: "達成したことある？" },
+      { name: b.name, text: "1月3日に一回だけ" },
+    ]],
+    3: [(a, b) => [
+      { name: a.name, text: "来月から新人入ってくるのかな" },
+      { name: b.name, text: `${b.gender === "F" ? "私" : "俺"}らも先輩になるんだね` },
+      { name: a.name, text: "先輩っぽいこと何もできないけど" },
+      { name: b.name, text: "「あの自販機のボタン、強く押さないと出ない」とかは教えられる" },
+    ]],
+    4: [(a, b) => [
+      { name: a.name, text: "花見やる？今年" },
+      { name: b.name, text: "CEOが場所取り担当っていう噂あるよ" },
+      { name: a.name, text: "嘘でしょ" },
+      { name: b.name, text: "嘘。でも言ったら本当にやりそう" },
+    ]],
+    6: [(a, b) => [
+      { name: a.name, text: "梅雨やばいね。朝から靴びしょびしょ" },
+      { name: b.name, text: "会社に置き靴してる人いるよね。あれ賢い" },
+      { name: a.name, text: "でもさ、置き靴がカビてたら意味ないよね" },
+      { name: b.name, text: "…確認してくる" },
+    ]],
+    7: [(a, b) => [
+      { name: a.name, text: "夏休みどこ行くの？" },
+      { name: b.name, text: "まだ決めてない。有給取れるかもわかんないし" },
+      { name: a.name, text: "CEOに聞いてみれば？" },
+      { name: b.name, text: "CEOは毎日が夏休みでしょ" },
+    ]],
+    8: [(a, b) => [
+      { name: a.name, text: "暑すぎない？エアコン効いてなくない？" },
+      { name: b.name, text: "経費削減で設定温度28度らしいよ" },
+      { name: a.name, text: "28度って涼しくないやつじゃん" },
+      { name: b.name, text: "涼しい顔して仕事してるのCEOだけ" },
+    ]],
+    10: [(a, b) => [
+      { name: a.name, text: "ハロウィンなんかやる？" },
+      { name: b.name, text: "去年誰かがスーツにカボチャのネクタイしてきた" },
+      { name: a.name, text: "それで？" },
+      { name: b.name, text: "それで終わり。誰も触れなかった" },
+    ]],
+    12: [(a, b) => [
+      { name: a.name, text: "忘年会やるの？今年" },
+      { name: b.name, text: "幹事やりたくないんだけど" },
+      { name: a.name, text: `${a.gender === "F" ? "私" : "俺"}もやりたくない` },
+      { name: b.name, text: "…じゃあ誰がやるの" },
+      { name: a.name, text: "CEOにやらせよう" },
+      { name: b.name, text: "予算全部高級ウイスキーに消えそう" },
+    ]],
+  };
   
   const OFFICE_GOSSIP = [
     (a, b) => [
-      { name: a.name, text: `${b.name}さんって毎日何時に来てるか知ってる？` },
+      { name: a.name, text: "隣の部署の人って毎日何時に来てるか知ってる？" },
       { name: b.name, text: "知らない。でも帰りは毎日一番最後だよね" },
       { name: a.name, text: "あれ仕事してんのかな。ネットサーフィンしてんのかな" },
       { name: b.name, text: "でもさ、なんか帰りたくない日ってあるじゃん。家より会社のほうが落ち着くみたいな" },
@@ -533,6 +744,90 @@ function generateBreakroomChats(subs, companies) {
       { name: b.name, text: "奇跡を信じよう" },
       { name: a.name, text: "奇跡に頼る経営ってどうなの" },
       { name: b.name, text: "うちの会社、わりとそれで回ってるよ" },
+    ],
+    // === 女子社員が絡む会話（性別不問のもの） ===
+    (a, b) => [
+      { name: a.name, text: "なんか今日疲れた顔してない？" },
+      { name: b.name, text: "え、わかる？昨日3時まで起きてた" },
+      { name: a.name, text: "何してたの？" },
+      { name: b.name, text: "ドラマ一気見…" },
+      { name: a.name, text: "明日に影響出るやつじゃん" },
+      { name: b.name, text: "出てる。いま出てる" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "最近さ、朝のコーヒーが唯一の楽しみなのよ" },
+      { name: b.name, text: "わかる。あの5分だけ人間に戻る感じ" },
+      { name: a.name, text: "始業したらロボットになるもんね" },
+      { name: b.name, text: "高性能ロボットだと思いたい" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "最近ハマってるものある？" },
+      { name: b.name, text: "推しの配信" },
+      { name: a.name, text: "あー、いいよね。誰推し？" },
+      { name: b.name, text: "言ったら引かない？" },
+      { name: a.name, text: "引かない引かない" },
+      { name: b.name, text: "…CEO" },
+      { name: a.name, text: "引いた" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "デスクに写真立て置いてる人って何なんだろ" },
+      { name: b.name, text: "家族とかペットとかでしょ" },
+      { name: a.name, text: "あの人のデスク、猫の写真5枚あるよ" },
+      { name: b.name, text: "5枚は多いね。でもちょっと見たい" },
+      { name: a.name, text: "かわいいよ。こっそり見に行こ" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "今日お弁当？" },
+      { name: b.name, text: "うん。昨日の残りだけど" },
+      { name: a.name, text: `えらいね。${a.gender === "F" ? "私" : "俺"}コンビニ率が上がってきて自分に引いてる` },
+      { name: b.name, text: "コンビニも進化してるから" },
+      { name: a.name, text: "フォローありがとう" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "有給取りたいけど取りづらくない？" },
+      { name: b.name, text: "わかる。忙しい時期に申請するの勇気いるよね" },
+      { name: a.name, text: "でもさ、たまには何もしない日がほしいのよ" },
+      { name: b.name, text: "何もしない日に限って何かしちゃうけどね" },
+      { name: a.name, text: "掃除とか始めちゃうのなんでだろ" },
+    ],
+  ];
+
+  // Female-only conversations (only used when both speakers are female)
+  const FEMALE_GOSSIP = [
+    (a, b) => [
+      { name: a.name, text: "ねえ、新しくできたランチのお店行った？" },
+      { name: b.name, text: "あー、あのパスタのとこ？行った行った" },
+      { name: a.name, text: "どうだった？" },
+      { name: b.name, text: "おいしかったけど量が多い。女子には多い" },
+      { name: a.name, text: "今度シェアしよ" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "髪切った？" },
+      { name: b.name, text: "え、気づいてくれた？3センチだけなんだけど" },
+      { name: a.name, text: "なんか雰囲気変わったなって" },
+      { name: b.name, text: "…嬉しい。誰にも言われなかったから" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "今日の服かわいいね" },
+      { name: b.name, text: "ほんと？セールで買ったやつ" },
+      { name: a.name, text: "似合ってる。そのカーディガンの色すごくいい" },
+      { name: b.name, text: "…もう一枚買おうかな、色違いで" },
+      { name: a.name, text: "買いな買いな" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "なんか最近肌荒れひどくて" },
+      { name: b.name, text: "ストレス？仕事？" },
+      { name: a.name, text: "たぶん睡眠。毎日5時間くらいしか寝てない" },
+      { name: b.name, text: "それは肌もそうだけど身体壊すよ" },
+      { name: a.name, text: "わかってるんだけど、布団入ってからスマホ見ちゃうのよ" },
+      { name: b.name, text: "…わかる" },
+    ],
+    (a, b) => [
+      { name: a.name, text: "来週の飲み会、何着てく？" },
+      { name: b.name, text: "えー、考えてなかった。仕事終わりだからそのままじゃない？" },
+      { name: a.name, text: "…ちょっとだけ考えてるでしょ" },
+      { name: b.name, text: "一応リップは変えようかなって" },
+      { name: a.name, text: "やっぱりね" },
     ],
   ];
 
@@ -909,24 +1204,55 @@ function generateBreakroomChats(subs, companies) {
 
   const getPair = () => {
     const a = wrap(pick(subs));
-    let b = pick(subs.filter(s => s.id !== a.id));
-    b = b ? wrap(b) : a;
+    // Prefer someone with a different last name
+    const bPool = subs.filter(s => s.id !== a.id && s.name.split(" ")[0] !== a.name);
+    let b = bPool.length > 0 ? wrap(pick(bPool)) : wrap(pick(subs.filter(s => s.id !== a.id)));
+    if (!b) b = a;
     return [a, b];
   };
 
   // 1-2 general chats
   const gCount = 1 + (Math.random() < 0.4 ? 1 : 0);
   for (let i = 0; i < gCount; i++) {
-    const [a, b] = getPair();
-    chats.push({ type: "gossip", icon: "☕", label: "雑談", msgs: pick(OFFICE_GOSSIP)(a, b) });
+    let ga, gb;
+    const females = subs.filter(s => s.gender === "F");
+    if (females.length >= 1 && Math.random() < 0.5) {
+      ga = wrap(pick(females));
+      const gbPool = subs.filter(s => s.id !== ga.id && s.name.split(" ")[0] !== ga.name);
+      gb = gbPool.length > 0 ? wrap(pick(gbPool)) : wrap(pick(subs.filter(s => s.id !== ga.id)));
+      if (!gb) gb = ga;
+    } else {
+      [ga, gb] = getPair();
+    }
+    const gossipPool = (ga.gender === "F" && gb.gender === "F" && FEMALE_GOSSIP.length > 0)
+      ? (Math.random() < 0.6 ? FEMALE_GOSSIP : OFFICE_GOSSIP)
+      : OFFICE_GOSSIP;
+    chats.push({ type: "gossip", icon: "☕", label: "雑談", msgs: pick(gossipPool)(ga, gb) });
   }
 
-  // Romance (60% chance)
-  if (Math.random() < 0.6) {
-    const [a, b] = getPair();
-    const others = subs.filter(s => s.id !== a.id && s.id !== b.id);
-    const c = others.length > 0 ? wrap(pick(others)) : b;
-    chats.push({ type: "romance", icon: "💕", label: "恋バナ", msgs: pick(ROMANCE_GOSSIP)(a, b, c) });
+  // Romance (60% chance) - prefer female participants, skip if no females
+  if (Math.random() < 0.6 && subs.length >= 3) {
+    const females = subs.filter(s => s.gender === "F");
+    if (females.length >= 1) {
+      let a, b;
+      if (females.length >= 2 && Math.random() < 0.6) {
+        // Two women gossiping
+        a = wrap(pick(females));
+        const bPool = females.filter(s => s.id !== a.id && s.name.split(" ")[0] !== a.name);
+        b = bPool.length > 0 ? wrap(pick(bPool)) : wrap(pick(females.filter(s => s.id !== a.id)));
+      } else {
+        // One woman + one other person (different display name)
+        a = wrap(pick(females));
+        const bPool = subs.filter(s => s.id !== a.id && s.name.split(" ")[0] !== a.name);
+        b = bPool.length > 0 ? wrap(pick(bPool)) : wrap(pick(subs.filter(s => s.id !== a.id)));
+      }
+      if (b && a.id !== b.id) {
+        const others = subs.filter(s => s.id !== a.id && s.id !== b.id);
+        const cPool = others.filter(s => s.name.split(" ")[0] !== a.name && s.name.split(" ")[0] !== b.name);
+        const c = cPool.length > 0 ? wrap(pick(cPool)) : others.length > 0 ? wrap(pick(others)) : b;
+        chats.push({ type: "romance", icon: "💕", label: "恋バナ", msgs: pick(ROMANCE_GOSSIP)(a, b, c) });
+      }
+    }
   }
 
   // Trait-specific (40% chance)
@@ -936,6 +1262,13 @@ function generateBreakroomChats(subs, companies) {
       const r = t(a, b);
       if (r) { chats.push({ type: "trait", icon: "👀", label: "噂話", msgs: r }); break; }
     }
+  }
+
+  // Seasonal chat
+  if (SEASONAL_CHAT[currentMonth] && subs.length >= 2) {
+    const [a, b] = getPair();
+    const template = pick(SEASONAL_CHAT[currentMonth]);
+    chats.unshift({ type: "seasonal", icon: "🗓️", label: "季節の話題", msgs: template(a, b) });
   }
 
   return chats.map(chat => ({
@@ -1106,6 +1439,10 @@ function SubordinateCard({ sub, companies, expanded, onToggle }) {
 
 export default function ConglomerateCEO() {
   const [screen, setScreen] = useState("title");
+  const [groupNameInput, setGroupNameInput] = useState("");
+  const [customSubName, setCustomSubName] = useState("");
+  const [customSubGender, setCustomSubGender] = useState("M");
+  const [groupName, setGroupName] = useState("");
   const [turn, setTurn] = useState(1);
   const [money, setMoney] = useState(50000000);
   const [companies, setCompanies] = useState([]);
@@ -1120,36 +1457,91 @@ export default function ConglomerateCEO() {
   const [showCompanyDetail, setShowCompanyDetail] = useState(null);
   const [roomItems, setRoomItems] = useState([]);
   const [showEnding, setShowEnding] = useState(false);
+  const [recruitBonus, setRecruitBonus] = useState(0);
+  const [discoveredSynergies, setDiscoveredSynergies] = useState([]);
   const [showFoundModal, setShowFoundModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(null);
   const [expandedSub, setExpandedSub] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [trendHistory, setTrendHistory] = useState({});
+  const [competition, setCompetition] = useState({});
   const [tab, setTab] = useState("companies");
   const subIdRef = useRef(0);
 
   const initGame = useCallback(() => {
-    const it = {}, ih = {};
+    const gn = groupNameInput.trim() || DEFAULT_GROUP_NAMES[Math.floor(Math.random() * DEFAULT_GROUP_NAMES.length)];
+    setGroupName(gn);
+    usedRosterNames.clear();
+    const it = {}, ih = {}, ic = {};
     INDUSTRIES.forEach(ind => {
       it[ind.id] = 0.5 + (Math.random() - 0.5) * 0.3;
       ih[ind.id] = [it[ind.id]];
+      ic[ind.id] = ind.baseCompetition + (Math.random() - 0.5) * 0.2;
     });
     const subs = [];
     for (let i = 0; i < 6; i++) subs.push(generateSubordinate(subIdRef.current++));
+    // Custom employee (コネ入社)
+    if (customSubName.trim()) {
+      const custom = generateSubordinate(subIdRef.current++);
+      custom.name = customSubName.trim();
+      custom.gender = customSubGender;
+      custom.history = [{ turn: 1, text: "入社" }];
+      subs.push(custom);
+    }
     setTurn(1); setMoney(50000000); setCompanies([]); setSubordinates(subs);
-    setTrends(it); setTrendHistory(ih); setTurnLog([]); setGameOver(false); setNews(null); setGossip(null); setRivals([]); setHeadhuntOffer(null); setBreakroomChats([]); setRoomItems([]);
+    setTrends(it); setTrendHistory(ih); setCompetition(ic); setTurnLog([]); setGameOver(false); setNews(null); setGossip(null); setRivals([]); setHeadhuntOffer(null); setBreakroomChats([]); setRoomItems([]); setRecruitBonus(0); setDiscoveredSynergies([]);
     setScreen("game"); setTab("companies"); setExpandedSub(null);
+  }, [groupNameInput, customSubName, customSubGender]);
+
+  // Save/Load
+  const saveGame = useCallback(() => {
+    try {
+      const state = {
+        turn, money, companies, subordinates, trends, trendHistory, competition,
+        rivals, roomItems, discoveredSynergies, recruitBonus, groupName,
+        tab, breakroomChats,
+      };
+      localStorage.setItem("teiou-save", JSON.stringify(state));
+    } catch (e) { console.error("Save failed", e); }
+  }, [turn, money, companies, subordinates, trends, trendHistory, competition, rivals, roomItems, discoveredSynergies, recruitBonus, groupName, tab, breakroomChats]);
+
+  const loadGame = useCallback(() => {
+    try {
+      const raw = localStorage.getItem("teiou-save");
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+      setTurn(s.turn); setMoney(s.money); setCompanies(s.companies); setSubordinates(s.subordinates);
+      setTrends(s.trends); setTrendHistory(s.trendHistory); setCompetition(s.competition || {});
+      setRivals(s.rivals || []); setRoomItems(s.roomItems || []); setDiscoveredSynergies(s.discoveredSynergies || []);
+      setRecruitBonus(s.recruitBonus || 0); setGroupName(s.groupName || "");
+      setTab(s.tab || "companies"); setBreakroomChats(s.breakroomChats || []);
+      setTurnLog([]); setGameOver(false); setNews(null); setGossip(null); setHeadhuntOffer(null);
+      setScreen("game"); setExpandedSub(null);
+      // Restore used names
+      usedRosterNames.clear();
+      (s.subordinates || []).forEach(sub => usedRosterNames.add(sub.name));
+      return true;
+    } catch (e) { console.error("Load failed", e); return false; }
   }, []);
 
+  const hasSave = typeof window !== "undefined" && !!localStorage.getItem("teiou-save");
+
+  // Auto-save when turn changes
+  useEffect(() => {
+    if (screen === "game" && turn > 1) saveGame();
+  }, [turn, screen, saveGame]);
+
   const foundCompany = (industry) => {
+    if (companies.length >= 5) return;
     const cost = 5000000 + Math.floor(Math.random() * 5000000);
     if (money < cost) return;
     const comp = {
-      id: Date.now(), industry: industry.id, name: pickCompanyName(industry.id),
+      id: Date.now(), industry: industry.id, name: groupCompanyName(groupName, industry.id),
       icon: industry.icon, founded: turn, revenue: 0, totalProfit: 0,
       manager: null, health: 100, cost,
       stats: { tech: 10 + rand(0, 15), brand: 5 + rand(0, 10), share: 5 + rand(0, 10), org: 10 + rand(0, 10) },
       profitHistory: [],
+      profitStreak: 0,
       chronicle: [{ turn, text: "設立" }],
     };
     setCompanies(p => [...p, comp]);
@@ -1183,11 +1575,38 @@ export default function ConglomerateCEO() {
   const sellCompany = (companyId) => {
     const comp = companies.find(c => c.id === companyId);
     if (!comp) return;
-    const val = Math.max(1000000, Math.floor(comp.health * 30000 + comp.totalProfit * 0.3));
+    const st = comp.stats || { tech: 10, brand: 10, share: 10, org: 10 };
+    const statAvg = (st.tech + st.brand + st.share + st.org) / 4;
+    const rank = companyRank(st);
+    const baseVal = comp.cost || 5000000;
+    const val = Math.max(1000000, Math.floor(
+      baseVal * (0.5 + rank.tier * 0.5) +
+      statAvg * 80000 +
+      comp.health * 20000 +
+      Math.max(0, comp.totalProfit) * 0.4
+    ));
     setMoney(p => p + val);
     setCompanies(p => p.filter(c => c.id !== companyId));
     setSubordinates(p => p.map(s => s.assigned === companyId ? { ...s, assigned: null, history: [...(s.history || []), { turn, text: `${comp.name}売却に伴い配属解除` }] } : s));
     setTurnLog(p => [...p, `📤 ${comp.name}を${formatMoney(val)}円で売却`]);
+  };
+
+  const raiseSalary = (subId) => {
+    const sub = subordinates.find(s => s.id === subId);
+    if (!sub) return;
+    const raiseAmount = Math.round(sub.salary * 0.15);
+    const newSalary = sub.salary + raiseAmount;
+    const loyaltyBoost = rand(3, 6);
+    setSubordinates(p => p.map(s =>
+      s.id === subId ? {
+        ...s,
+        salary: newSalary,
+        stats: { ...s.stats, loyalty: clamp(s.stats.loyalty + loyaltyBoost, 1, 99) },
+        mood: Math.min(100, s.mood + rand(3, 8)),
+        history: [...(s.history || []), { turn, text: `昇給（年俸${formatMoney(newSalary)}円に）` }],
+      } : s
+    ));
+    setTurnLog(p => [...p, `💴 ${sub.name}を昇給（+${formatMoney(raiseAmount)}円/年 → 忠誠心+${loyaltyBoost}）`]);
   };
 
   const fireSubordinate = (subId) => {
@@ -1206,6 +1625,8 @@ export default function ConglomerateCEO() {
     setMoney(p => p + offer);
     setSubordinates(p => p.filter(s => s.id !== target.id));
     setTurnLog(p => [...p, `💰 ${target.name}を${org}に${formatMoney(offer)}円で売却した`]);
+    setTurnLog(p => [...p, `📈 人材売却の実績が業界に広まった。優秀な人材が集まりやすくなった`]);
+    setRecruitBonus(p => p + 10);
     setHeadhuntOffer(null);
   };
 
@@ -1231,7 +1652,7 @@ export default function ConglomerateCEO() {
       log.push(`📰 ${currentNews.text}`);
     }
 
-    const nt = { ...trends }, nh = { ...trendHistory };
+    const nt = { ...trends }, nh = { ...trendHistory }, nc_comp = { ...competition };
     INDUSTRIES.forEach(ind => {
       let ch = ind.baseTrend + (Math.random() - 0.5) * ind.volatility;
       // Mean reversion: trends pull back toward 0.5
@@ -1240,11 +1661,39 @@ export default function ConglomerateCEO() {
       if (currentNews && currentNews.affects.includes(ind.id)) ch += currentNews.modifier;
       nt[ind.id] = clamp(nt[ind.id] + ch, 0.05, 0.95);
       nh[ind.id] = [...(nh[ind.id] || []), nt[ind.id]];
+      // Competition follows trend: hot industries attract competitors
+      const compDrift = (nt[ind.id] - 0.5) * 0.05 + (Math.random() - 0.5) * 0.06;
+      nc_comp[ind.id] = clamp((nc_comp[ind.id] || ind.baseCompetition) + compDrift, 0.1, 0.95);
+    });
+
+    // Detect synergies
+    const ownedIndustries = companies.map(c => c.industry);
+    const newlyDiscovered = [];
+    SYNERGIES.forEach(syn => {
+      if (ownedIndustries.includes(syn.a) && ownedIndustries.includes(syn.b)) {
+        if (!discoveredSynergies.find(d => d.name === syn.name)) {
+          newlyDiscovered.push(syn);
+          log.push(`🔗 シナジー発見！「${syn.name}」（${INDUSTRIES.find(i=>i.id===syn.a)?.name}×${INDUSTRIES.find(i=>i.id===syn.b)?.name}）`);
+          log.push(`　　─ ${syn.desc}`);
+        }
+      }
+    });
+    if (newlyDiscovered.length > 0) {
+      setDiscoveredSynergies(p => [...p, ...newlyDiscovered]);
+    }
+    const activeSynergies = SYNERGIES.filter(syn =>
+      ownedIndustries.includes(syn.a) && ownedIndustries.includes(syn.b)
+    );
+    const synergyIndustries = {};
+    activeSynergies.forEach(syn => {
+      synergyIndustries[syn.a] = (synergyIndustries[syn.a] || 0) + syn.bonus;
+      synergyIndustries[syn.b] = (synergyIndustries[syn.b] || 0) + syn.bonus;
     });
 
     let totalRev = 0;
     const nc = companies.map(comp => {
       const trend = nt[comp.industry];
+      const compDensity = nc_comp[comp.industry] || 0.5;
       const mgr = subordinates.find(s => s.assigned === comp.id);
       let mB = 0.1;
       if (mgr) {
@@ -1256,8 +1705,12 @@ export default function ConglomerateCEO() {
       // Rank bonus: higher rank = more base revenue
       const rank = companyRank(comp.stats || { tech: 10, brand: 10, share: 10, org: 10 });
       const rankMultiplier = 1 + (rank.tier - 1) * 0.2;
+      // Competition: high competition reduces profit, but high share offsets
+      const shareOffset = ((comp.stats || {}).share || 10) / 100;
+      const competitionPenalty = Math.max(0.4, 1 - compDensity * 0.6 + shareOffset * 0.4);
+      const synergyBonus = 1 + (synergyIndustries[comp.industry] || 0);
 
-      let rev = Math.floor((trend * mB + (Math.random() - 0.4) * 0.5) * 5000000 * rankMultiplier);
+      let rev = Math.floor((trend * mB + (Math.random() - 0.4) * 0.5) * 5000000 * rankMultiplier * competitionPenalty * synergyBonus);
       const opCost = 1000000 + rand(0, 500000);
       let profit = rev - opCost;
       let hp = comp.health;
@@ -1281,7 +1734,25 @@ export default function ConglomerateCEO() {
         st.tech = clamp(st.tech - rand(1, 3), 0, 99);
         st.org = clamp(st.org - rand(2, 4), 0, 99);
       }
-      st.brand = clamp(st.brand + (profit > 0 ? rand(1, 3) : rand(-4, -1)), 0, 99);
+
+      // Brand: multi-factor growth
+      let brandChange = 0;
+      // 1. History: age of company (slow baseline growth)
+      const monthsOld = turn - comp.founded;
+      if (monthsOld > 0) brandChange += Math.min(2, monthsOld * 0.03);
+      // 2. Consecutive profit streak
+      const streak = profit > 0 ? (comp.profitStreak || 0) + 1 : 0;
+      if (streak >= 6) brandChange += 3;
+      else if (streak >= 3) brandChange += 2;
+      else if (streak >= 1) brandChange += 1;
+      if (profit < 0) brandChange -= rand(1, 2);
+      // 3. Charisma manager
+      if (mgr && mgr.trait.name === "カリスマ") brandChange += rand(1, 3);
+      // 4. Resilience: recovered from crisis
+      if (comp.health < 30 && hp >= 30) brandChange += 5;
+      // Apply
+      st.brand = clamp(st.brand + Math.round(brandChange), 0, 99);
+
       const negoBonus = mgr ? (mgr.stats.negotiation - 40) * 0.06 : -1;
       st.share = clamp(st.share + Math.round((trend - 0.45) * 8 + negoBonus + rand(-2, 2)), 0, 99);
 
@@ -1294,10 +1765,11 @@ export default function ConglomerateCEO() {
       if (newRank.tier > oldRank.tier) chron.push({ turn, text: `${newRank.title}に昇格` });
       if (comp.totalProfit <= 0 && comp.totalProfit + profit > 0) chron.push({ turn, text: "累計損益が初めて黒字に" });
       if (hp < 30 && comp.health >= 30) chron.push({ turn, text: "経営危機に陥る" });
+      if (streak === 6) chron.push({ turn, text: "6ヶ月連続黒字を達成" });
 
       totalRev += profit;
       log.push(`${profit > 0 ? "📈" : "📉"} ${comp.name}: ${profit > 0 ? "+" : ""}${formatMoney(profit)}円 (体力${hp})`);
-      return { ...comp, revenue: profit, totalProfit: comp.totalProfit + profit, health: hp, stats: st, profitHistory: newHistory, chronicle: chron };
+      return { ...comp, revenue: profit, totalProfit: comp.totalProfit + profit, health: hp, stats: st, profitHistory: newHistory, chronicle: chron, profitStreak: streak };
     });
 
     const surviving = [];
@@ -1314,17 +1786,23 @@ export default function ConglomerateCEO() {
     setSubordinates(prev => {
       let updated = prev.map(sub => {
         let mood = sub.mood;
+        const newStats = { ...sub.stats };
         if (sub.assigned) {
           const c = surviving.find(cc => cc.id === sub.assigned);
-          if (c && c.revenue > 0) mood = Math.min(100, mood + rand(2, 8));
-          else if (c && c.revenue < 0) mood = Math.max(5, mood - rand(3, 10));
+          if (c && c.revenue > 0) {
+            mood = Math.min(100, mood + rand(2, 8));
+            // Success breeds loyalty... but ambition grows faster
+            newStats.loyalty = clamp(newStats.loyalty + (Math.random() < 0.4 ? 1 : 0), 1, 99);
+            newStats.ambition = clamp(newStats.ambition + (Math.random() < 0.5 ? rand(1, 2) : 0), 1, 99);
+          }
+          else if (c && c.revenue < 0) mood = Math.max(5, mood - rand(1, 4));
         } else {
-          mood = Math.max(10, mood - rand(1, 3));
+          mood = Math.max(10, mood - rand(0, 2));
         }
         // Espresso machine bonus
         if (roomItems.includes("espresso")) mood = Math.min(100, mood + 2);
-        // Normal quit
-        if (sub.stats.loyalty < 30 && mood < 25 && Math.random() < 0.2) {
+        // Normal quit - very rare, only extreme cases
+        if (sub.stats.loyalty < 20 && mood < 15 && Math.random() < 0.08) {
           log.push(`🚶 ${sub.name}が不満を抱えて退職した…`);
           return null;
         }
@@ -1348,24 +1826,56 @@ export default function ConglomerateCEO() {
               health: 80,
               founded: turn,
               threat: Math.round(sub.overall * 0.8),
+              stats: {
+                tech: Math.round(sub.stats.creativity * 0.6 + rand(5, 15)),
+                brand: Math.round(sub.stats.execution * 0.4 + rand(5, 10)),
+                share: Math.round(sub.stats.negotiation * 0.5 + rand(5, 10)),
+                org: Math.round(sub.stats.leadership * 0.5 + rand(5, 10)),
+              },
             }]);
             return null;
           }
         }
-        // Grow subordinate stats
-        const newStats = { ...sub.stats };
+        // Grow subordinate stats (newStats already declared above with loyalty/ambition changes)
+        const gt = sub.growthTendency || { fast: ["execution", "leadership"], slow: "stamina" };
+        const isFast = (stat) => gt.fast.includes(stat);
+        const isSlow = (stat) => gt.slow === stat;
+        const growRate = (stat, base) => isFast(stat) ? base * 1.8 : isSlow(stat) ? base * 0.3 : base;
+        let newHistory = [...(sub.history || [])];
+
         if (sub.assigned) {
-          // Working: execution and leadership slowly grow, small random bumps
-          if (Math.random() < 0.3) newStats.execution = clamp(newStats.execution + rand(0, 2), 1, 99);
-          if (Math.random() < 0.2) newStats.leadership = clamp(newStats.leadership + rand(0, 1), 1, 99);
-          if (Math.random() < 0.15) newStats.negotiation = clamp(newStats.negotiation + rand(0, 1), 1, 99);
-          if (Math.random() < 0.1) newStats.stamina = clamp(newStats.stamina - rand(0, 1), 1, 99);
+          // Working: grow via experience
+          if (Math.random() < growRate("execution", 0.35)) newStats.execution = clamp(newStats.execution + rand(1, 2), 1, 99);
+          if (Math.random() < growRate("leadership", 0.25)) newStats.leadership = clamp(newStats.leadership + rand(0, 2), 1, 99);
+          if (Math.random() < growRate("negotiation", 0.2)) newStats.negotiation = clamp(newStats.negotiation + rand(0, 1), 1, 99);
+          if (Math.random() < growRate("creativity", 0.1)) newStats.creativity = clamp(newStats.creativity + rand(0, 1), 1, 99);
         } else {
-          // Idle: creativity may grow (free time), execution decays (getting rusty)
-          if (Math.random() < 0.2) newStats.creativity = clamp(newStats.creativity + rand(0, 2), 1, 99);
-          if (Math.random() < 0.25) newStats.execution = clamp(newStats.execution - rand(0, 2), 1, 99);
-          if (Math.random() < 0.15) newStats.ambition = clamp(newStats.ambition + rand(0, 1), 1, 99);
-          if (Math.random() < 0.1) newStats.loyalty = clamp(newStats.loyalty - rand(0, 1), 1, 99);
+          // Idle: self-study + random training events
+          if (Math.random() < growRate("creativity", 0.25)) newStats.creativity = clamp(newStats.creativity + rand(0, 2), 1, 99);
+          if (Math.random() < growRate("execution", 0.1)) newStats.execution = clamp(newStats.execution + rand(0, 1), 1, 99);
+          if (Math.random() < growRate("leadership", 0.1)) newStats.leadership = clamp(newStats.leadership + rand(0, 1), 1, 99);
+          if (Math.random() < growRate("negotiation", 0.1)) newStats.negotiation = clamp(newStats.negotiation + rand(0, 1), 1, 99);
+          if (Math.random() < growRate("stamina", 0.1)) newStats.stamina = clamp(newStats.stamina + rand(0, 1), 1, 99);
+
+          // Random training events (15% chance per month while idle)
+          if (Math.random() < 0.15) {
+            const trainings = [
+              { stat: "leadership", amount: rand(2, 5), text: "リーダーシップ研修に参加" },
+              { stat: "execution", amount: rand(2, 5), text: "業務効率化セミナーを受講" },
+              { stat: "creativity", amount: rand(2, 5), text: "デザイン思考ワークショップに参加" },
+              { stat: "negotiation", amount: rand(2, 5), text: "交渉術研修に参加" },
+              { stat: "stamina", amount: rand(2, 4), text: "社内マラソン大会に出場" },
+              { stat: "leadership", amount: rand(3, 6), text: "他部署でマネジメント経験を積んだ" },
+              { stat: "execution", amount: rand(3, 5), text: "プロジェクト支援チームに参加" },
+              { stat: "creativity", amount: rand(3, 6), text: "社外のハッカソンに出場" },
+              { stat: "negotiation", amount: rand(2, 4), text: "顧客対応の研修に参加" },
+              { stat: "leadership", amount: rand(2, 4), text: "新人教育の担当を務めた" },
+              { stat: "creativity", amount: rand(2, 4), text: "業界カンファレンスに参加" },
+            ];
+            const training = trainings[Math.floor(Math.random() * trainings.length)];
+            newStats[training.stat] = clamp(newStats[training.stat] + training.amount, 1, 99);
+            newHistory = [...newHistory, { turn, text: training.text }];
+          }
         }
         const newOverall = Math.round(
           newStats.leadership * 0.15 + newStats.execution * 0.2 + newStats.creativity * 0.15 +
@@ -1374,13 +1884,13 @@ export default function ConglomerateCEO() {
         );
 
         return { ...sub, mood, turnsWorked: sub.turnsWorked + 1,
-          stats: newStats, overall: newOverall,
+          stats: newStats, overall: newOverall, history: newHistory,
           comment: pickComment({ ...sub, mood }, sub.assigned ? (surviving.find(cc => cc.id === sub.assigned)?.revenue || 0) : 0),
         };
       }).filter(Boolean);
       // Idle subordinates get restless and may quit
       updated = updated.filter(sub => {
-        if (!sub.assigned && sub.turnsWorked >= 8 && sub.mood < 30 && Math.random() < 0.15) {
+        if (!sub.assigned && sub.turnsWorked >= 15 && sub.mood < 20 && Math.random() < 0.08) {
           log.push(`🚶 ${sub.name}が待機に耐えかねて退職した…「もう待てません」`);
           return false;
         }
@@ -1389,6 +1899,17 @@ export default function ConglomerateCEO() {
       // New hire only if under cap (12)
       if (updated.length < 12 && Math.random() < 0.25) {
         const ns = generateSubordinate(subIdRef.current++);
+        if (recruitBonus > 0) {
+          const boost = recruitBonus;
+          for (const k of Object.keys(ns.stats)) {
+            ns.stats[k] = clamp(ns.stats[k] + rand(0, boost), 1, 99);
+          }
+          ns.overall = Math.round(
+            ns.stats.leadership * 0.15 + ns.stats.execution * 0.2 + ns.stats.creativity * 0.15 +
+            ns.stats.negotiation * 0.1 + ns.stats.stamina * 0.1 + ns.stats.luck * 0.1 +
+            ns.stats.loyalty * 0.1 + ns.stats.ambition * 0.1
+          );
+        }
         ns.history = [{ turn, text: "入社" }];
         log.push(`👤 新人材「${ns.name}」(${ns.trait.name})が応募してきた`);
         updated = [...updated, ns];
@@ -1396,7 +1917,101 @@ export default function ConglomerateCEO() {
       return updated;
     });
 
-    // Apply company chronicle additions from betrayal events
+    // Process rivals: they compete with your companies
+    setRivals(prev => {
+      return prev.map(rival => {
+        const trend = nt[rival.industry] || 0.5;
+        const yourComp = surviving.find(c => c.industry === rival.industry);
+        const rs = rival.stats || { tech: 20, brand: 20, share: 20, org: 20 };
+
+        // Rival stats grow each turn
+        rs.tech = clamp(rs.tech + rand(0, 3), 0, 99);
+        rs.brand = clamp(rs.brand + (trend > 0.5 ? rand(0, 2) : rand(-2, 1)), 0, 99);
+        rs.share = clamp(rs.share + Math.round((trend - 0.45) * 4 + rand(-1, 2)), 0, 99);
+        rs.org = clamp(rs.org + rand(0, 2), 0, 99);
+
+        let hp = rival.health;
+        let newThreat = rival.threat;
+
+        if (yourComp) {
+          const cs = yourComp.stats || { tech: 10, brand: 10, share: 10, org: 10 };
+          // Compare 4 stats
+          let wins = 0, losses = 0;
+          if (cs.tech > rs.tech) wins++; else if (cs.tech < rs.tech) losses++;
+          if (cs.brand > rs.brand) wins++; else if (cs.brand < rs.brand) losses++;
+          if (cs.share > rs.share) wins++; else if (cs.share < rs.share) losses++;
+          if (cs.org > rs.org) wins++; else if (cs.org < rs.org) losses++;
+
+          if (wins > losses) {
+            // Your company is stronger - rival weakens
+            hp -= rand(5, 12);
+            rs.brand = clamp(rs.brand - rand(1, 3), 0, 99);
+            log.push(`⚔️ ${yourComp.name}が「${rival.name}」を圧倒している（${wins}勝${losses}敗）`);
+          } else if (losses > wins) {
+            // Rival is stronger - rival grows, you take damage
+            hp = Math.min(100, hp + rand(1, 4));
+            newThreat = Math.min(99, newThreat + rand(1, 3));
+            const damage = Math.round(newThreat * trend * 3);
+            totalRev -= damage * 10000;
+            log.push(`⚔️ ライバル「${rival.name}」が${yourComp.name}を圧倒！ -${formatMoney(damage * 10000)}円（${losses}勝${wins}敗）`);
+          } else {
+            // Tie - small damage, slow decay
+            const damage = Math.round(newThreat * trend * 1);
+            totalRev -= damage * 10000;
+            hp -= rand(1, 3);
+            log.push(`⚔️ ${yourComp.name}と「${rival.name}」が拮抗（引分）-${formatMoney(damage * 10000)}円`);
+          }
+        } else {
+          // No competing company - rival expands freely
+          hp = Math.min(100, hp + rand(1, 3));
+          newThreat = Math.min(99, newThreat + rand(0, 2));
+        }
+
+        // Natural decay (no parent company resources)
+        hp -= rand(1, 3);
+
+        if (hp <= 0) {
+          const defeatMsg = RIVAL_DEFEAT_MSGS[Math.floor(Math.random() * RIVAL_DEFEAT_MSGS.length)];
+          log.push(`🎉 ライバル「${rival.name}」が倒れた。`);
+          log.push(`　　─ ${defeatMsg}`);
+          // Chronicle entry for competing company
+          const yourComp2 = surviving.find(c => c.industry === rival.industry);
+          if (yourComp2) {
+            companyChronicleAdds.push({ companyId: yourComp2.id, entry: { turn, text: `ライバル「${rival.name}」を打倒` } });
+          }
+          // Founder may return (50% chance)
+          if (Math.random() < 0.5) {
+            const returnMsg = RIVAL_RETURN_MSGS[Math.floor(Math.random() * RIVAL_RETURN_MSGS.length)];
+            const rs = rival.stats || { tech: 20, brand: 20, share: 20, org: 20 };
+            const returnee = generateSubordinate(subIdRef.current++);
+            returnee.name = rival.founder;
+            // Boosted: gained experience from running own company
+            returnee.stats.leadership = clamp(returnee.stats.leadership + rand(5, 15), 1, 99);
+            returnee.stats.execution = clamp(returnee.stats.execution + rand(5, 10), 1, 99);
+            returnee.stats.creativity = clamp(returnee.stats.creativity + rand(3, 8), 1, 99);
+            returnee.stats.negotiation = clamp(returnee.stats.negotiation + rand(3, 8), 1, 99);
+            // Loyalty: higher than before but NOT maxed. They've done it once, could do it again
+            returnee.stats.loyalty = clamp(rand(45, 65), 1, 99);
+            // Ambition: still high. A person who started their own company doesn't lose ambition
+            returnee.stats.ambition = clamp(rand(55, 80), 1, 99);
+            returnee.overall = Math.round(
+              returnee.stats.leadership * 0.15 + returnee.stats.execution * 0.2 + returnee.stats.creativity * 0.15 +
+              returnee.stats.negotiation * 0.1 + returnee.stats.stamina * 0.1 + returnee.stats.luck * 0.1 +
+              returnee.stats.loyalty * 0.1 + returnee.stats.ambition * 0.1
+            );
+            returnee.history = [{ turn, text: `復帰（元ライバル「${rival.name}」創業者）` }];
+            returnee.mood = 60;
+            setSubordinates(p => p.length < 12 ? [...p, returnee] : p);
+            log.push(`🔄 ${rival.founder}が復帰を希望している！`);
+            log.push(`　　─ ${returnMsg}`);
+          }
+          return null;
+        }
+        return { ...rival, health: clamp(hp, 0, 100), threat: newThreat, stats: rs };
+      }).filter(Boolean);
+    });
+
+    // Apply company chronicle additions from betrayal and rival events
     if (companyChronicleAdds.length > 0) {
       setCompanies(p => p.map(c => {
         const adds = companyChronicleAdds.filter(a => a.companyId === c.id);
@@ -1405,44 +2020,28 @@ export default function ConglomerateCEO() {
       }));
     }
 
-    // Process rivals: they compete with your companies and may die
-    setRivals(prev => {
-      return prev.map(rival => {
-        const trend = nt[rival.industry] || 0.5;
-        const yourComp = surviving.find(c => c.industry === rival.industry);
-        if (yourComp) {
-          const damage = Math.round(rival.threat * trend * 0.3);
-          log.push(`⚔️ ライバル「${rival.name}」(元${rival.founder})が${yourComp.name}の顧客を奪っている！ -${formatMoney(damage * 10000)}円`);
-          totalRev -= damage * 10000;
-        }
-        let hp = rival.health;
-        if (trend > 0.5) hp = Math.min(100, hp + rand(1, 5));
-        else hp = Math.max(0, hp - rand(5, 15));
-        hp -= rand(1, 4); // rivals slowly decay without your resources
-        if (hp <= 0) {
-          log.push(`🎉 ライバル「${rival.name}」が潰れた！元${rival.founder}は今頃泣いている`);
-          return null;
-        }
-        return { ...rival, health: hp };
-      }).filter(Boolean);
-    });
-
-    // HEADHUNT OFFER (random, ~15% chance)
-    if (Math.random() < 0.15 && subordinates.length > 0) {
+    // HEADHUNT OFFER (random, ~7% chance)
+    if (Math.random() < 0.07 && subordinates.length > 0) {
       const targets = subordinates.filter(s => s.overall >= 40);
       if (targets.length > 0) {
         const target = targets[Math.floor(Math.random() * targets.length)];
         const org = HEADHUNT_ORGS[Math.floor(Math.random() * HEADHUNT_ORGS.length)];
-        const offer = Math.round((target.overall * 80 + rand(500, 3000)) * 1000);
+        const offer = Math.max(1000000, Math.round((() => {
+          const base = target.salary * 1.2;
+          const abilityBonus = Math.max(0, (target.overall - 40)) * 80000;
+          const managerBonus = target.assigned ? 5000000 : 0;
+          const traitBonus = ["カリスマ", "天才肌", "人たらし"].includes(target.trait.name) ? 3000000 : 0;
+          return base + abilityBonus + managerBonus + traitBonus + rand(-1000000, 1500000);
+        })()));
         setHeadhuntOffer({ target, org, offer });
       }
     }
 
     setMoney(p => p + totalRev); setCompanies(surviving);
-    setTrends(nt); setTrendHistory(nh); setTurnLog(log); setTurn(p => p + 1);
+    setTrends(nt); setTrendHistory(nh); setCompetition(nc_comp); setTurnLog(log); setTurn(p => p + 1);
     setNews(currentNews);
     setGossip(Math.random() < 0.5 ? GOSSIP_POOL[Math.floor(Math.random() * GOSSIP_POOL.length)] : null);
-    setBreakroomChats(generateBreakroomChats(subordinates, surviving));
+    setBreakroomChats(generateBreakroomChats(subordinates, surviving, turn));
     if (money + totalRev <= 0 && surviving.length === 0) setGameOver(true);
   };
 
@@ -1471,12 +2070,60 @@ export default function ConglomerateCEO() {
           WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 8,
         }}>帝王の眼</div>
         <div style={{ fontSize: 14, color: "#6a5a4a", marginBottom: 48, letterSpacing: 3 }}>─ グループ企業経営シミュレーション ─</div>
+        <div style={{ marginBottom: 24, textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "#6a5a4a", marginBottom: 8 }}>グループ名を入力</div>
+          <input
+            type="text"
+            value={groupNameInput}
+            onChange={e => setGroupNameInput(e.target.value)}
+            placeholder="例: アルカディア"
+            maxLength={10}
+            style={{
+              background: "#12101a", border: "1px solid #3a3050", borderRadius: 6,
+              color: "#e0d8c8", padding: "12px 16px", fontSize: 16, fontWeight: 700,
+              textAlign: "center", width: 200, outline: "none",
+              fontFamily: "'Noto Sans JP', sans-serif",
+            }}
+          />
+          <div style={{ fontSize: 11, color: "#3a3030", marginTop: 6 }}>未入力ならランダムで決まります</div>
+        </div>
+        <div style={{ marginBottom: 24, textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "#6a5a4a", marginBottom: 8 }}>コネ入社させる社員（任意）</div>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", alignItems: "center" }}>
+            <input
+              type="text"
+              value={customSubName}
+              onChange={e => setCustomSubName(e.target.value)}
+              placeholder="名前"
+              maxLength={8}
+              style={{
+                background: "#12101a", border: "1px solid #3a3050", borderRadius: 6,
+                color: "#e0d8c8", padding: "10px 14px", fontSize: 14, fontWeight: 700,
+                textAlign: "center", width: 140, outline: "none",
+                fontFamily: "'Noto Sans JP', sans-serif",
+              }}
+            />
+            <button onClick={() => setCustomSubGender(g => g === "M" ? "F" : "M")} style={{
+              background: "#12101a", border: "1px solid #3a3050", borderRadius: 6,
+              color: customSubGender === "F" ? "#cc88aa" : "#8a8aaa",
+              padding: "10px 14px", fontSize: 14, cursor: "pointer", fontWeight: 700,
+            }}>{customSubGender === "F" ? "♀" : "♂"}</button>
+          </div>
+          <div style={{ fontSize: 11, color: "#3a3030", marginTop: 6 }}>未入力なら通常採用のみ</div>
+        </div>
+        {hasSave && (
+          <button onClick={loadGame} style={{
+            background: "linear-gradient(135deg, #2a3a4a, #1a2a3a)", color: "#88bbdd",
+            border: "1px solid #3a4a5a", padding: "14px 48px", fontSize: 16, fontWeight: 700,
+            borderRadius: 4, cursor: "pointer", letterSpacing: 4, marginBottom: 12,
+          }}>続きから</button>
+        )}
         <button onClick={initGame} style={{
           background: "linear-gradient(135deg, #ffd700, #ff8800)", color: "#1a1025",
           border: "none", padding: "16px 48px", fontSize: 18, fontWeight: 700,
           borderRadius: 4, cursor: "pointer", letterSpacing: 4,
           boxShadow: "0 4px 24px rgba(255,170,0,0.3)",
-        }}>経営開始</button>
+        }}>新規で始める</button>
         <div style={{ fontSize: 12, color: "#4a4040", marginTop: 32, textAlign: "center", lineHeight: 2 }}>
           業種を読み、会社を立て、部下のパラメータを見極めろ。<br/>初期資金: 5,000万円
         </div>
@@ -1500,7 +2147,7 @@ export default function ConglomerateCEO() {
           <span style={{ fontSize: 11, color: "#6a5a4a" }}>総資産</span>
           <span style={{ fontSize: 20, fontWeight: 700, color: money >= 0 ? "#ffd700" : "#ff4444" }}>{formatMoney(money)}円</span>
         </div>
-        <div style={{ fontSize: 11, color: "#6a5a4a" }}>傘下{companies.length}社 / {subordinates.length}名</div>
+        <div style={{ fontSize: 11, color: "#6a5a4a" }}>{groupName}グループ / {companies.length}社 / {subordinates.length}名</div>
       </div>
 
       {gameOver && (
@@ -1517,11 +2164,12 @@ export default function ConglomerateCEO() {
       <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
         {!gameOver && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button onClick={() => setShowFoundModal(true)} style={{
-              background: "linear-gradient(135deg, #2a4a2a, #1a3a1a)", color: "#88cc88",
-              border: "1px solid #3a5a3a", padding: "10px 18px", borderRadius: 4,
-              cursor: "pointer", fontWeight: 700, fontSize: 13,
-            }}>+ 新会社設立</button>
+            <button onClick={() => companies.length < 5 && setShowFoundModal(true)} style={{
+              background: companies.length >= 5 ? "#1a1a1a" : "linear-gradient(135deg, #2a4a2a, #1a3a1a)",
+              color: companies.length >= 5 ? "#555" : "#88cc88",
+              border: `1px solid ${companies.length >= 5 ? "#222" : "#3a5a3a"}`, padding: "10px 18px", borderRadius: 4,
+              cursor: companies.length >= 5 ? "default" : "pointer", fontWeight: 700, fontSize: 13,
+            }}>+ 設立({companies.length}/5)</button>
             <button onClick={advanceTurn} style={{
               background: "linear-gradient(135deg, #4a3a1a, #3a2a0a)", color: "#ffd700",
               border: "1px solid #5a4a2a", padding: "10px 24px", borderRadius: 4,
@@ -1589,6 +2237,22 @@ export default function ConglomerateCEO() {
             <div style={{ color: "#3a3030", fontSize: 13, padding: 20, textAlign: "center" }}>まだ会社がない。</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {/* Active Synergies */}
+              {(() => {
+                const ownedInds = companies.map(c => c.industry);
+                const active = SYNERGIES.filter(s => ownedInds.includes(s.a) && ownedInds.includes(s.b));
+                return active.length > 0 ? (
+                  <div style={{ background: "linear-gradient(135deg, #1a1820, #201828)", border: "1px solid #2a2840", borderRadius: 8, padding: 10 }}>
+                    <div style={{ fontSize: 10, color: "#8a7acc", letterSpacing: 2, marginBottom: 6 }}>🔗 発動中のシナジー</div>
+                    {active.map((s, i) => (
+                      <div key={i} style={{ fontSize: 12, color: "#aa99cc", marginBottom: 2 }}>
+                        <span style={{ fontWeight: 700 }}>{s.name}</span>
+                        <span style={{ color: "#6a5a7a", fontSize: 10, marginLeft: 6 }}>+{Math.round(s.bonus * 100)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null;
+              })()}
               {companies.map(comp => {
                 const mgr = subordinates.find(s => s.assigned === comp.id);
                 const trend = trendLabel(trends[comp.industry]);
@@ -1655,6 +2319,9 @@ export default function ConglomerateCEO() {
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {rivals.map(rival => {
                 const ind = INDUSTRIES.find(i => i.id === rival.industry);
+                const rs = rival.stats || { tech: 20, brand: 20, share: 20, org: 20 };
+                const yourComp = companies.find(c => c.industry === rival.industry);
+                const cs = yourComp?.stats || null;
                 return (
                   <div key={rival.id} style={{
                     background: "linear-gradient(135deg, #1e1418, #221820)",
@@ -1666,9 +2333,30 @@ export default function ConglomerateCEO() {
                       <span style={{ fontSize: 11, color: "#6a4a4a" }}>{ind?.name}</span>
                     </div>
                     <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 11 }}>
-                      <span style={{ color: "#8a5a5a" }}>創業者: {rival.founder}</span>
-                      <span style={{ color: "#8a5a5a" }}>脅威度: <span style={{ color: rival.threat > 50 ? "#dd5544" : "#aa8855", fontWeight: 700 }}>{rival.threat}</span></span>
-                      <span style={{ color: "#8a5a5a" }}>体力: <span style={{ color: rival.health > 50 ? "#888" : "#aa5544" }}>{rival.health}</span></span>
+                      <span style={{ color: "#8a5a5a" }}>元{rival.founder}</span>
+                      <span style={{ color: "#8a5a5a" }}>脅威<span style={{ color: rival.threat > 50 ? "#dd5544" : "#aa8855", fontWeight: 700 }}>{rival.threat}</span></span>
+                      <span style={{ color: "#8a5a5a" }}>体力<span style={{ color: rival.health > 50 ? "#888" : "#aa5544" }}>{rival.health}</span></span>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3px 12px", marginTop: 6, fontSize: 10 }}>
+                      {[
+                        { key: "tech", name: "技術", icon: "🔬" },
+                        { key: "brand", name: "ブランド", icon: "✨" },
+                        { key: "share", name: "シェア", icon: "📊" },
+                        { key: "org", name: "組織", icon: "🏛️" },
+                      ].map(s => {
+                        const rv = rs[s.key] || 0;
+                        const mv = cs ? cs[s.key] || 0 : null;
+                        const winning = mv !== null && mv > rv;
+                        const losing = mv !== null && mv < rv;
+                        return (
+                          <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <span>{s.icon}</span>
+                            <span style={{ color: "#6a4a4a", width: 30 }}>{s.name}</span>
+                            <span style={{ color: losing ? "#dd5544" : winning ? "#55aa55" : "#888", fontWeight: 700 }}>{rv}</span>
+                            {mv !== null && <span style={{ color: "#4a3a3a", fontSize: 9 }}>({winning ? "勝" : losing ? "負" : "="})</span>}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -1693,10 +2381,17 @@ export default function ConglomerateCEO() {
                   />
                 ))}
                 {expandedSub && (
-                  <button onClick={() => fireSubordinate(expandedSub)} style={{
-                    background: "#2a1a1a", color: "#aa4444", border: "1px solid #4a2020",
-                    borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 700,
-                  }}>🚪 この人材を解雇</button>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => raiseSalary(expandedSub)} style={{
+                      flex: 1, background: "linear-gradient(135deg, #2a3a1a, #1a2a0a)", color: "#aacc66",
+                      border: "1px solid #3a4a2a", borderRadius: 6, padding: "8px 16px",
+                      cursor: "pointer", fontSize: 13, fontWeight: 700,
+                    }}>💴 昇給（忠誠心↑）</button>
+                    <button onClick={() => fireSubordinate(expandedSub)} style={{
+                      background: "#2a1a1a", color: "#aa4444", border: "1px solid #4a2020",
+                      borderRadius: 6, padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 700,
+                    }}>🚪 解雇</button>
+                  </div>
                 )}
               </>
             )}
@@ -1705,26 +2400,63 @@ export default function ConglomerateCEO() {
 
         {/* MARKET TAB */}
         {tab === "market" && (
-          <div style={{ background: "#12101a", border: "1px solid #2a2030", borderRadius: 8, padding: 12, display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ background: "#12101a", border: "1px solid #2a2030", borderRadius: 8, padding: 12, display: "flex", flexDirection: "column", gap: 6 }}>
             {INDUSTRIES.map(ind => {
               const val = trends[ind.id] || 0.5;
               const t = trendLabel(val);
               const owned = companies.find(c => c.industry === ind.id);
+              const comp_d = competition[ind.id] || ind.baseCompetition;
+              const compLabel = comp_d >= 0.75 ? "激戦" : comp_d >= 0.5 ? "混戦" : comp_d >= 0.3 ? "穏やか" : "ブルーオーシャン";
+              const compColor = comp_d >= 0.75 ? "#dd5544" : comp_d >= 0.5 ? "#aa8844" : comp_d >= 0.3 ? "#668866" : "#4488aa";
               const hist = trendHistory[ind.id] || [];
               const prev = hist.length >= 2 ? hist[hist.length - 2] : val;
               const diff = val - prev;
               const diffStr = diff > 0.001 ? `+${(diff*100).toFixed(0)}` : diff < -0.001 ? `${(diff*100).toFixed(0)}` : "";
               const diffColor = diff > 0.001 ? "#44bb44" : diff < -0.001 ? "#dd5544" : "#666";
+              // Trend prediction based on recent momentum
+              const recent = hist.slice(-6);
+              const momentum = recent.length >= 3 ? (recent[recent.length - 1] - recent[0]) / recent.length : 0;
+              const prediction = momentum > 0.02 ? "▲" : momentum < -0.02 ? "▼" : "─";
+              const predColor = momentum > 0.02 ? "#44bb44" : momentum < -0.02 ? "#dd5544" : "#555";
+              // Sparkline: show month-over-month changes
+              const spark = hist.slice(-17);
+              const deltas = [];
+              for (let i = 1; i < spark.length; i++) deltas.push(spark[i] - spark[i - 1]);
+              const maxDelta = deltas.length > 0 ? Math.max(...deltas.map(Math.abs), 0.01) : 0.01;
               return (
-                <div key={ind.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, padding: "4px 0", borderBottom: "1px solid #1a1828" }}>
-                  <span style={{ fontSize: 15 }}>{ind.icon}</span>
-                  <span style={{ color: "#a09888", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ind.name}</span>
-                  {owned && <span style={{ fontSize: 10, color: "#ffd70088" }}>参入中</span>}
-                  <div style={{ width: 50, height: 6, background: "#1a1018", borderRadius: 3, flexShrink: 0 }}>
-                    <div style={{ width: `${val * 100}%`, height: "100%", borderRadius: 3, background: `linear-gradient(90deg, #444, ${t.color})` }} />
+                <div key={ind.id} style={{ padding: "6px 0", borderBottom: "1px solid #1a1828" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                    <span style={{ fontSize: 14 }}>{ind.icon}</span>
+                    <span style={{ color: "#a09888", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ind.name}</span>
+                    {owned && <span style={{ fontSize: 9, color: "#ffd70088" }}>参入中</span>}
+                    <span style={{ color: t.color, fontWeight: 700, fontSize: 11, width: 48, textAlign: "right" }}>{t.text}</span>
+                    <span style={{ color: diffColor, fontSize: 11, fontWeight: 700, width: 24, textAlign: "right" }}>{diffStr}</span>
                   </div>
-                  <span style={{ color: t.color, fontWeight: 700, fontSize: 11, width: 52, textAlign: "right" }}>{t.text}</span>
-                  <span style={{ color: diffColor, fontSize: 11, fontWeight: 700, width: 28, textAlign: "right" }}>{diffStr}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, marginLeft: 22 }}>
+                    {/* Sparkline */}
+                    <div style={{ display: "flex", gap: 1, height: 20, flex: 1, position: "relative" }}>
+                      <div style={{ position: "absolute", left: 0, right: 0, top: 10, height: 1, background: "#2a2030" }} />
+                      {deltas.map((d, i) => {
+                        const h = Math.max(1, Math.abs(d) / maxDelta * 9);
+                        return (
+                          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 3, height: 20 }}>
+                            <div style={{ height: 10, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                              {d >= 0 && <div style={{ width: "100%", height: h, background: i === deltas.length - 1 ? "#44aa44" : "#2a5a2a", borderRadius: 1 }} />}
+                            </div>
+                            <div style={{ height: 10, display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
+                              {d < 0 && <div style={{ width: "100%", height: h, background: i === deltas.length - 1 ? "#dd5544" : "#5a2a2a", borderRadius: 1 }} />}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <span style={{ fontSize: 10, color: predColor, width: 40, textAlign: "right" }}>
+                      予測{prediction}
+                    </span>
+                    <span style={{ fontSize: 9, color: compColor, width: 48, textAlign: "right", fontWeight: 700 }}>
+                      {compLabel}
+                    </span>
+                  </div>
                 </div>
               );
             })}
@@ -1878,6 +2610,34 @@ export default function ConglomerateCEO() {
               </>
             )}
 
+            {/* Synergy Collection */}
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 12, color: "#8a7acc", letterSpacing: 2, marginBottom: 8 }}>🔗 発見したシナジー ({discoveredSynergies.length}/{SYNERGIES.length})</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {SYNERGIES.map((syn, i) => {
+                  const found = discoveredSynergies.find(d => d.name === syn.name);
+                  return (
+                    <div key={i} style={{
+                      background: found ? "#14121e" : "#0e0c10",
+                      border: `1px solid ${found ? "#2a2840" : "#1a1820"}`,
+                      borderRadius: 6, padding: "6px 10px",
+                    }}>
+                      {found ? (
+                        <div>
+                          <div style={{ fontSize: 12, color: "#aa99cc", fontWeight: 700 }}>{syn.name}</div>
+                          <div style={{ fontSize: 10, color: "#6a5a7a" }}>
+                            {INDUSTRIES.find(ii=>ii.id===syn.a)?.name}×{INDUSTRIES.find(ii=>ii.id===syn.b)?.name} ─ {syn.desc}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 12, color: "#2a2830" }}>？？？</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Ending Button */}
             <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid #1a1828", textAlign: "center" }}>
               <button onClick={() => setShowEnding(true)} style={{
@@ -1991,7 +2751,7 @@ export default function ConglomerateCEO() {
             <div style={{ textAlign: "center", marginBottom: 40 }}>
               <div style={{ fontSize: 11, color: "#3a3a3a", letterSpacing: 4, marginBottom: 24 }}>FIN</div>
               <div style={{ fontSize: 11, color: "#3a3030" }}>
-                {turnToDate(turn)} / 総資産 {formatMoney(money)}円 / 傘下{totalCompanies}社 / 社員{totalSubs}名
+                {turnToDate(turn)} / {groupName}グループ / 総資産 {formatMoney(money)}円 / 傘下{totalCompanies}社 / 社員{totalSubs}名
               </div>
             </div>
 
@@ -2023,7 +2783,7 @@ export default function ConglomerateCEO() {
 
         const COMP_STATS = [
           { key: "tech", name: "技術力", icon: "🔬", desc: "責任者の創造力で成長" },
-          { key: "brand", name: "ブランド力", icon: "✨", desc: "黒字が続くと上昇" },
+          { key: "brand", name: "ブランド力", icon: "✨", desc: "歴史・連続黒字・カリスマ・逆境復活で成長" },
           { key: "share", name: "市場シェア", icon: "📊", desc: "交渉力+業界トレンドで成長" },
           { key: "org", name: "組織力", icon: "🏛️", desc: "責任者の統率力で成長" },
         ];
@@ -2141,21 +2901,66 @@ export default function ConglomerateCEO() {
             {compRivals.length > 0 && (
               <div style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 11, color: "#aa5544", letterSpacing: 2, marginBottom: 8 }}>⚔️ 競合ライバル</div>
-                {compRivals.map(r => (
+                {compRivals.map(r => {
+                  const rs = r.stats || { tech: 20, brand: 20, share: 20, org: 20 };
+                  const cs = comp.stats || { tech: 10, brand: 10, share: 10, org: 10 };
+                  const statList = [
+                    { key: "tech", name: "技術力", icon: "🔬" },
+                    { key: "brand", name: "ブランド", icon: "✨" },
+                    { key: "share", name: "シェア", icon: "📊" },
+                    { key: "org", name: "組織力", icon: "🏛️" },
+                  ];
+                  const wins = statList.filter(s => cs[s.key] > rs[s.key]).length;
+                  const losses = statList.filter(s => cs[s.key] < rs[s.key]).length;
+                  return (
                   <div key={r.id} style={{
-                    background: "#1a1218", border: "1px solid #2a1820", borderRadius: 6, padding: "8px 10px", marginBottom: 4,
+                    background: "#1a1218", border: "1px solid #2a1820", borderRadius: 6, padding: "10px 12px", marginBottom: 6,
                   }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 6 }}>
                       <span style={{ color: "#cc8888", fontWeight: 700 }}>{r.name}</span>
-                      <span style={{ color: "#8a5a5a", fontSize: 11 }}>脅威度 {r.threat}</span>
+                      <span style={{ color: "#8a5a5a", fontSize: 11 }}>脅威{r.threat} / 体力{r.health}</span>
                     </div>
-                    <div style={{ fontSize: 11, color: "#6a4a4a" }}>
-                      元{r.founder} / 体力{r.health}
+                    <div style={{ fontSize: 10, color: "#6a4a4a", marginBottom: 6 }}>元{r.founder}</div>
+                    {statList.map(s => {
+                      const rv = rs[s.key] || 0;
+                      const mv = cs[s.key] || 0;
+                      const total = Math.max(rv + mv, 1);
+                      return (
+                        <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, fontSize: 10 }}>
+                          <span style={{ width: 14, textAlign: "center" }}>{s.icon}</span>
+                          <span style={{ color: mv > rv ? "#55aa55" : "#888", width: 18, textAlign: "right", fontWeight: 700 }}>{mv}</span>
+                          <div style={{ flex: 1, height: 6, background: "#1a1018", borderRadius: 3, display: "flex", overflow: "hidden" }}>
+                            <div style={{ width: `${(mv / total) * 100}%`, height: "100%", background: "#2a5a2a" }} />
+                            <div style={{ width: `${(rv / total) * 100}%`, height: "100%", background: "#5a2a2a" }} />
+                          </div>
+                          <span style={{ color: rv > mv ? "#dd5544" : "#888", width: 18, fontWeight: 700 }}>{rv}</span>
+                        </div>
+                      );
+                    })}
+                    <div style={{ fontSize: 10, color: wins > losses ? "#55aa55" : losses > wins ? "#dd5544" : "#888", marginTop: 4, textAlign: "right" }}>
+                      {wins > losses ? `自社優勢（${wins}勝${losses}敗）` : losses > wins ? `ライバル優勢（${losses}勝${wins}敗）` : "拮抗"}
                     </div>
+                  </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Employee Voices */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 11, color: "#6a5a4a", letterSpacing: 2, marginBottom: 8 }}>💬 社員の声</div>
+              <div style={{
+                background: "#0e0c14", borderRadius: 8, padding: "10px 12px",
+                borderLeft: `2px solid ${rank.tier >= 5 ? "#4a6a4a" : comp.health < 30 ? "#6a3a3a" : "#2a2040"}`,
+              }}>
+                {getEmployeeVoice(comp).map((msg, i) => (
+                  <div key={i} style={{ display: "flex", gap: 8, alignItems: "start", marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, color: "#4a4a3a", minWidth: 28, flexShrink: 0, textAlign: "right" }}>社員{msg.s}</span>
+                    <span style={{ fontSize: 11, color: "#8a7a6a", lineHeight: 1.6 }}>{msg.text}</span>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
 
             {/* Actions */}
             <div style={{ display: "flex", gap: 8 }}>
@@ -2182,6 +2987,9 @@ export default function ConglomerateCEO() {
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {availableIndustries.map(ind => {
                 const t = trendLabel(trends[ind.id]);
+                const comp_d = competition[ind.id] || ind.baseCompetition;
+                const compLabel = comp_d >= 0.75 ? "激戦" : comp_d >= 0.5 ? "混戦" : comp_d >= 0.3 ? "穏やか" : "ブルーオーシャン";
+                const compColor = comp_d >= 0.75 ? "#dd5544" : comp_d >= 0.5 ? "#aa8844" : comp_d >= 0.3 ? "#668866" : "#4488aa";
                 return (
                   <button key={ind.id} onClick={() => foundCompany(ind)} style={{
                     background: "#12101a", border: "1px solid #2a2030", borderRadius: 6,
@@ -2191,7 +2999,10 @@ export default function ConglomerateCEO() {
                     <span style={{ fontSize: 20 }}>{ind.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ color: "#d0c8b8", fontWeight: 700, fontSize: 14 }}>{ind.name}</div>
-                      <div style={{ color: t.color, fontSize: 11 }}>{t.text}</div>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <span style={{ color: t.color, fontSize: 11 }}>{t.text}</span>
+                        <span style={{ color: compColor, fontSize: 10, fontWeight: 700 }}>{compLabel}</span>
+                      </div>
                     </div>
                   </button>
                 );
@@ -2301,7 +3112,7 @@ export default function ConglomerateCEO() {
               }}>🤝 断る</button>
             </div>
             <div style={{ fontSize: 11, color: "#5a4a3a", marginTop: 10, lineHeight: 1.6 }}>
-              売却: 移籍金を受け取るが人材を失う<br/>
+              売却: 移籍金+今後の新入社員が優秀になる<br/>
               断る: 人材を守り、忠誠心が少し上がる
             </div>
           </div>
