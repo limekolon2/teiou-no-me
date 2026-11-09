@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { liveStart, liveLog, liveUpdate } from "./live";
 
 const INDUSTRIES = [
   { id: "ai", name: "AI・機械学習", icon: "🤖", volatility: 0.35, baseTrend: 0.005, baseCompetition: 0.8 },
@@ -1530,6 +1531,54 @@ export default function ConglomerateCEO() {
   useEffect(() => {
     if (screen === "game" && turn > 1) saveGame();
   }, [turn, screen, saveGame]);
+
+  // 観戦欄（ポータル）への状態送信。読み取って送るだけで、ゲームの進行・セーブには関与しない（src/live.js）
+  const liveActiveRef = useRef(false);
+  const livePrevTurnRef = useRef(0);
+  const livePrevLogRef = useRef([]);
+  useEffect(() => {
+    if (screen !== "game") { liveActiveRef.current = false; return; }
+    // プレイ開始、または新しいゲームでターンが巻き戻ったら、新しいセッション
+    if (!liveActiveRef.current || turn < livePrevTurnRef.current) {
+      liveStart();
+      liveActiveRef.current = true;
+      livePrevLogRef.current = [];
+    }
+    livePrevTurnRef.current = turn;
+  }, [screen, turn]);
+  useEffect(() => {
+    if (screen !== "game") return;
+    const prev = livePrevLogRef.current;
+    const appended = turnLog.length >= prev.length && prev.every((t, i) => turnLog[i] === t);
+    (appended ? turnLog.slice(prev.length) : turnLog).forEach(t => liveLog(t));
+    livePrevLogRef.current = turnLog;
+  }, [turnLog, screen]);
+  useEffect(() => {
+    if (screen !== "game") return;
+    try {
+      const board = companies.length === 0
+        ? "まだ会社はない。資金を元手に、最初の1社をどこにするか。"
+        : companies.map(c => {
+            const ind = INDUSTRIES.find(i => i.id === c.industry);
+            const mgr = subordinates.find(sb => sb.assigned === c.id);
+            const rev = c.revenue || 0;
+            return `${c.icon} ${ind ? ind.name : c.name}：${rev >= 0 ? "黒字" : "赤字"}（${rev >= 0 ? "+" : ""}${formatMoney(rev)}円）${mgr ? ` 社長 ${mgr.name}` : " 社長不在"}`;
+          }).join("\n");
+      liveUpdate(
+        {
+          stats: {
+            日付: turnToDate(turn),
+            資金: `${formatMoney(money)}円`,
+            グループ会社: `${companies.length}社`,
+            部下: `${subordinates.length}人`,
+          },
+          board,
+          グループ名: groupName,
+        },
+        { ended: gameOver || showEnding }
+      );
+    } catch { /* 送信用の要約に失敗してもゲームは続ける */ }
+  }, [screen, turn, money, companies, subordinates, groupName, gameOver, showEnding, turnLog]);
 
   const foundCompany = (industry) => {
     if (companies.length >= 5) return;
