@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { liveStart, liveLog, liveUpdate, liveSpectate, SPECTATE } from "./live";
+import { liveStart, liveLog, liveUpdate, liveSpectate, liveEnd, SPECTATE } from "./live";
+import QuitButton from "./QuitButton";
 
 const INDUSTRIES = [
   { id: "ai", name: "AI・機械学習", icon: "🤖", volatility: 0.35, baseTrend: 0.005, baseCompetition: 0.8 },
@@ -2258,7 +2259,20 @@ export default function ConglomerateCEO() {
           <span style={{ fontSize: 11, color: "#6a5a4a" }}>総資産</span>
           <span style={{ fontSize: 20, fontWeight: 700, color: money >= 0 ? "#ffd700" : "#ff4444" }}>{formatMoney(money)}円</span>
         </div>
-        <div style={{ fontSize: 11, color: "#6a5a4a" }}>{groupName}グループ / {companies.length}社 / {subordinates.length}名</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ fontSize: 11, color: "#6a5a4a" }}>{groupName}グループ / {companies.length}社 / {subordinates.length}名</div>
+          {/* やめてポータルに戻る（観戦モードでは出さない） */}
+          <QuitButton
+            hidden={SPECTATE}
+            note={turn > 1 ? "ここまでの経営は保存されます。" : "まだ1ヶ月目なので、今回の経営は保存されません。"}
+            onQuit={async () => {
+              if (turn > 1) saveGame(); // 自動セーブと同じ条件
+              await liveEnd();
+            }}
+            theme={{ panel: "#1a1520", text: "#e8d8b8", sub: "#8a7a6a", border: "#3a3050", accent: "#ffd700", accentText: "#1a1025", font: "'Noto Sans JP', sans-serif", radius: 8 }}
+            style={{ background: "transparent", color: "#8a7a6a", border: "1px solid #3a3050", borderRadius: 4, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+          />
+        </div>
       </div>
 
       {gameOver && (
