@@ -3,7 +3,7 @@
 // ■ 遊んでいる側（ふつうに開いたとき）
 //   - 要約（ポータルの観戦欄用）      … チャンネル `live`、イベント `state`。最大5秒に1回
 //   - 画面の全状態（観戦モード用）    … チャンネル `live-teiou-no-me`、イベント `full`。最大2秒に1回
-//   - ハートビート（途中参加・休止防止）… テーブル `live_heartbeat` に upsert（state=要約、full=全状態）。最大5秒に1回
+//   - ハートビート（途中参加・休止防止）… テーブル `live_heartbeat` に upsert（state=要約、full_state=全状態）。最大5秒に1回
 //   - 変化したときだけ送る。放置中は何も送らない
 //
 // ■ 観戦する側（?spectate=1 で開いたとき）
@@ -169,8 +169,8 @@ const summaryOut = makeThrottle(SUMMARY_INTERVAL_MS, async ({ state, full }) => 
   await sendBroadcast(SUMMARY_CHANNEL, SUMMARY_EVENT, stamped);
   if (!(await connect())) return;
   const row = { game_id: GAME_ID, session_id: stamped.session_id, updated_at: stamped.updated_at, state: stamped };
-  const { error } = await client.from(TABLE).upsert({ ...row, full });
-  // full 列がまだ無い（SQL 未実行）ときは、要約だけでも書いておく
+  const { error } = await client.from(TABLE).upsert({ ...row, full_state: full });
+  // full_state 列がまだ無い（SQL 未実行）ときは、要約だけでも書いておく
   if (error) await client.from(TABLE).upsert(row);
 });
 
@@ -256,8 +256,8 @@ export function liveSpectate(onFull) {
   const readHeartbeat = async () => {
     try {
       if (!(await connect())) return;
-      const { data } = await client.from(TABLE).select("full, updated_at").eq("game_id", GAME_ID).maybeSingle();
-      if (data && data.full) deliver(data.full, false);
+      const { data } = await client.from(TABLE).select("full_state, updated_at").eq("game_id", GAME_ID).maybeSingle();
+      if (data && data.full_state) deliver(data.full_state, false);
     } catch {
       // 読めなければ次の受信を待つ
     }
