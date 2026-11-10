@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { liveStart, liveLog, liveUpdate } from "./live";
+import { liveStart, liveLog, liveUpdate, liveSpectate, SPECTATE } from "./live";
 
 const INDUSTRIES = [
   { id: "ai", name: "AI・機械学習", icon: "🤖", volatility: 0.35, baseTrend: 0.005, baseCompetition: 0.8 },
@@ -1527,8 +1527,9 @@ export default function ConglomerateCEO() {
 
   const hasSave = typeof window !== "undefined" && !!localStorage.getItem("teiou-save");
 
-  // Auto-save when turn changes
+  // Auto-save when turn changes（観戦モードでは、見ている人のセーブを上書きしないよう保存しない）
   useEffect(() => {
+    if (SPECTATE) return;
     if (screen === "game" && turn > 1) saveGame();
   }, [turn, screen, saveGame]);
 
@@ -1575,10 +1576,71 @@ export default function ConglomerateCEO() {
           board,
           グループ名: groupName,
         },
-        { ended: gameOver || showEnding }
+        {
+          ended: gameOver || showEnding,
+          // 観戦モードで画面をそのまま描き直すための全状態
+          full: {
+            screen, groupName, turn, money, companies, subordinates, trends, trendHistory, competition,
+            turnLog, news, gossip, rivals, headhuntOffer, breakroomChats, roomItems, recruitBonus,
+            discoveredSynergies, showEnding, gameOver, tab, showCompanyDetail, showFoundModal,
+            showAssignModal, expandedSub,
+          },
+        }
       );
     } catch { /* 送信用の要約に失敗してもゲームは続ける */ }
-  }, [screen, turn, money, companies, subordinates, groupName, gameOver, showEnding, turnLog]);
+  }, [screen, turn, money, companies, subordinates, groupName, gameOver, showEnding, turnLog,
+      trends, trendHistory, competition, news, gossip, rivals, headhuntOffer, breakroomChats, roomItems,
+      recruitBonus, discoveredSynergies, tab, showCompanyDetail, showFoundModal, showAssignModal, expandedSub]);
+
+  // 観戦モード（?spectate=1）：受け取った状態でこの画面を描き直す。操作はすべて無効
+  useEffect(() => {
+    if (!SPECTATE) return;
+    const setters = {
+      screen: setScreen, groupName: setGroupName, turn: setTurn, money: setMoney, companies: setCompanies,
+      subordinates: setSubordinates, trends: setTrends, trendHistory: setTrendHistory, competition: setCompetition,
+      turnLog: setTurnLog, news: setNews, gossip: setGossip, rivals: setRivals, headhuntOffer: setHeadhuntOffer,
+      breakroomChats: setBreakroomChats, roomItems: setRoomItems, recruitBonus: setRecruitBonus,
+      discoveredSynergies: setDiscoveredSynergies, showEnding: setShowEnding, gameOver: setGameOver, tab: setTab,
+      showCompanyDetail: setShowCompanyDetail, showFoundModal: setShowFoundModal,
+      showAssignModal: setShowAssignModal, expandedSub: setExpandedSub,
+    };
+
+    // 「観戦中」の表示と、最初の状態が届くまでの待機画面
+    const badge = document.createElement("div");
+    badge.textContent = "観戦中 — 操作はできません";
+    Object.assign(badge.style, {
+      position: "fixed", bottom: "10px", right: "10px", zIndex: 99999, pointerEvents: "none",
+      background: "rgba(0,0,0,0.7)", color: "#ddd", font: "12px sans-serif", padding: "4px 10px",
+      borderRadius: "999px", letterSpacing: "1px",
+    });
+    const cover = document.createElement("div");
+    cover.textContent = "プレイが始まるのを待っています";
+    Object.assign(cover.style, {
+      position: "fixed", inset: "0", zIndex: 99998, display: "flex", alignItems: "center",
+      justifyContent: "center", background: "#0a0a0a", color: "#888", font: "14px sans-serif", letterSpacing: "2px",
+    });
+    document.body.append(cover, badge);
+
+    // クリック・入力をすべて止める（スクロールはできる）
+    const block = (e) => { e.stopPropagation(); e.preventDefault(); };
+    const events = ["click", "dblclick", "auxclick", "contextmenu", "keydown", "keyup", "keypress", "input", "change", "submit"];
+    events.forEach(ev => window.addEventListener(ev, block, true));
+
+    const stop = liveSpectate(({ state, ended }) => {
+      cover.remove();
+      Object.entries(setters).forEach(([key, set]) => {
+        if (key in state) set(state[key]);
+      });
+      badge.textContent = ended ? "観戦中 — このプレイは終了しました" : "観戦中 — 操作はできません";
+    });
+
+    return () => {
+      stop();
+      events.forEach(ev => window.removeEventListener(ev, block, true));
+      badge.remove();
+      cover.remove();
+    };
+  }, []);
 
   const foundCompany = (industry) => {
     if (companies.length >= 5) return;

@@ -1,40 +1,47 @@
-// ポータル（studio-portal）の観戦欄へ、いまのプレイ状態を送る。
+// ポータル（studio-portal）の観戦欄とのやりとり。
 //
-// - 送り先：Supabase Realtime Broadcast（チャンネル `live`、イベント `state`）
-//           ＋ テーブル `live_heartbeat` へ upsert（途中から見に来た人用・Supabase の休止防止）
-// - 接続情報は環境変数 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY。どちらかが無ければ何もしない
-// - 送信の失敗はすべてここで握りつぶす。ゲームのプレイ・セーブには一切影響させない
-// - 送る頻度は最大で3秒に1回（間に起きた変化は、最後の状態だけをまとめて送る）
+// ■ 遊んでいる側（ふつうに開いたとき）
+//   - 要約（ポータルの観戦欄用）      … チャンネル `live`、イベント `state`。最大5秒に1回
+//   - 画面の全状態（観戦モード用）    … チャンネル `live-teiou-no-me`、イベント `full`。最大2秒に1回
+//   - ハートビート（途中参加・休止防止）… テーブル `live_heartbeat` に upsert（state=要約、full=全状態）。最大5秒に1回
+//   - 変化したときだけ送る。放置中は何も送らない
+//
+// ■ 観戦する側（?spectate=1 で開いたとき）
+//   - `live-teiou-no-me` を受け取り、ゲーム画面をそのまま描き直す。操作・セーブ・送信はしない
+//   - 開いた時点とタブに戻った時点で、ハートビートの全状態を読む
+//
+// ■ 通信量の記録
+//   - 送った回数・受け取った回数・バイト数を手元で数え、1分ごとに Supabase の `live_usage_add` で日別に加算する
+//
+// - 接続情報は環境変数 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY。無ければ Supabase には何も送らない
+// - 同じブラウザ内のタブ同士は BroadcastChannel でも届く（動作確認用）
+// - 失敗はすべてここで握りつぶす。ゲームのプレイ・セーブには一切影響させない
 
 const URL = import.meta.env.VITE_SUPABASE_URL;
 const KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const ENABLED = Boolean(URL && KEY);
 
+export const SPECTATE =
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).get("spectate") === "1";
+
 const GAME_ID = "teiou-no-me";
 const GAME_TITLE = "帝王の眼";
-const CHANNEL = "live";
-const EVENT = "state";
+const SUMMARY_CHANNEL = "live";
+const SUMMARY_EVENT = "state";
+const FULL_CHANNEL = `live-${GAME_ID}`;
+const FULL_EVENT = "full";
 const TABLE = "live_heartbeat";
-const MIN_INTERVAL_MS = 3000;
+const SUMMARY_INTERVAL_MS = 5000;
+const FULL_INTERVAL_MS = 2000;
+const USAGE_FLUSH_MS = 60_000;
 const MAX_LOG = 20;
+const LOCAL_CHANNEL = `${GAME_ID}-live-local`;
+
+// ───────── 接続 ─────────
 
 let client = null;
-let channel = null;
-let ready = false;
 let connecting = null;
-
-let sessionId = null;
-let startedAt = null;
-let log = [];
-
-let pending = null; // まだ送っていない最新の状態
-let lastState = null; // 最後に送った状態（リアルタイム接続が開いた瞬間に送り直す）
-let lastSentAt = 0;
-let timer = null;
-
-function newSessionId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
+const channels = {}; // name -> { ch, ready }
 
 function connect() {
   if (!ENABLED) return Promise.resolve(false);
@@ -46,44 +53,136 @@ function connect() {
         // タブが閉じられる・裏に回る瞬間に出した書き込みも、最後まで届くように
         global: { fetch: (input, init) => fetch(input, { ...init, keepalive: true }) },
       });
-      channel = client.channel(CHANNEL);
-      channel.subscribe((status) => {
-        ready = status === "SUBSCRIBED";
-        if (ready && lastState && !pending) {
-          channel.send({ type: "broadcast", event: EVENT, payload: lastState }).catch(() => {});
-        }
-      });
       return true;
     })
-    .catch(() => {
-      client = null;
-      channel = null;
-      return false;
-    });
+    .catch(() => false);
   return connecting;
 }
 
-// iPhone の Safari などは、裏に回ったタブのタイマーを止める。
-// 送信待ちが残ったままタブを切り替えると最後の状態が届かないので、裏に回る瞬間にすぐ送る
-function flushNow() {
-  if (!pending) return;
-  if (timer) {
-    clearTimeout(timer);
-    timer = null;
-  }
-  flush();
-}
-if (ENABLED && typeof document !== "undefined") {
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") flushNow();
+function channel(name, onMessage) {
+  if (!client) return null;
+  if (channels[name]) return channels[name];
+  const entry = { ch: client.channel(name, { config: { broadcast: { self: false } } }), ready: false, onReady: null };
+  if (onMessage) entry.ch.on("broadcast", { event: onMessage.event }, ({ payload }) => onMessage.fn(payload));
+  entry.ch.subscribe((status) => {
+    entry.ready = status === "SUBSCRIBED";
+    if (entry.ready && entry.onReady) entry.onReady();
   });
-  window.addEventListener("pagehide", flushNow);
+  channels[name] = entry;
+  return entry;
 }
+
+const local = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(LOCAL_CHANNEL) : null;
+
+// ───────── 通信量の記録 ─────────
+
+const usage = { sends: 0, receives: 0, bytes: 0 };
+let usageTimer = null;
+
+function byteLength(obj) {
+  try {
+    return new TextEncoder().encode(JSON.stringify(obj)).length;
+  } catch {
+    return 0;
+  }
+}
+
+function countUsage(kind, payload) {
+  if (!ENABLED) return;
+  usage[kind] += 1;
+  usage.bytes += byteLength(payload);
+  if (!usageTimer) usageTimer = setTimeout(flushUsage, USAGE_FLUSH_MS);
+}
+
+async function flushUsage() {
+  if (usageTimer) {
+    clearTimeout(usageTimer);
+    usageTimer = null;
+  }
+  if (!usage.sends && !usage.receives) return;
+  const batch = { p_sends: usage.sends, p_receives: usage.receives, p_bytes: usage.bytes };
+  usage.sends = 0;
+  usage.receives = 0;
+  usage.bytes = 0;
+  try {
+    if (await connect()) await client.rpc("live_usage_add", batch);
+  } catch {
+    // 記録できなくても何もしない
+  }
+}
+
+// ───────── 遊んでいる側：送信 ─────────
+
+let sessionId = null;
+let startedAt = null;
+let log = [];
+
+function makeThrottle(interval, send) {
+  let pending = null;
+  let last = 0;
+  let timer = null;
+  const run = async () => {
+    timer = null;
+    if (!pending) return;
+    const item = pending;
+    pending = null;
+    last = Date.now();
+    try {
+      await send(item);
+    } catch {
+      // 送れなくてもゲームは続ける
+    }
+  };
+  return {
+    push(item, immediate = false) {
+      pending = item;
+      if (timer && !immediate) return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(run, immediate ? 0 : Math.max(0, last + interval - Date.now()));
+    },
+    flushNow() {
+      if (!pending) return;
+      if (timer) clearTimeout(timer);
+      run();
+    },
+  };
+}
+
+async function sendBroadcast(name, event, payload) {
+  if (!(await connect())) return;
+  const entry = channel(name);
+  if (!entry) return;
+  if (!entry.ready) {
+    // 接続が開いた瞬間に最新のものを送る
+    entry.onReady = () => {
+      entry.onReady = null;
+      entry.ch.send({ type: "broadcast", event, payload }).then(() => countUsage("sends", payload)).catch(() => {});
+    };
+    return;
+  }
+  await entry.ch.send({ type: "broadcast", event, payload });
+  countUsage("sends", payload);
+}
+
+const summaryOut = makeThrottle(SUMMARY_INTERVAL_MS, async ({ state, full }) => {
+  const stamped = { ...state, updated_at: new Date().toISOString() };
+  await sendBroadcast(SUMMARY_CHANNEL, SUMMARY_EVENT, stamped);
+  if (!(await connect())) return;
+  const row = { game_id: GAME_ID, session_id: stamped.session_id, updated_at: stamped.updated_at, state: stamped };
+  const { error } = await client.from(TABLE).upsert({ ...row, full });
+  // full 列がまだ無い（SQL 未実行）ときは、要約だけでも書いておく
+  if (error) await client.from(TABLE).upsert(row);
+});
+
+const fullOut = makeThrottle(FULL_INTERVAL_MS, async (full) => {
+  if (local) local.postMessage(full);
+  await sendBroadcast(FULL_CHANNEL, FULL_EVENT, full);
+});
 
 /** プレイ開始（新規・つづきから）のたびに呼ぶ */
 export function liveStart() {
-  if (!ENABLED) return;
-  sessionId = newSessionId();
+  if (SPECTATE) return;
+  sessionId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   startedAt = new Date().toISOString();
   log = [];
   connect();
@@ -91,64 +190,92 @@ export function liveStart() {
 
 /** 行動ログに1行足す（送信は次の liveUpdate で） */
 export function liveLog(text) {
-  if (!ENABLED || !text) return;
+  if (SPECTATE || !text) return;
   log.push({ at: new Date().toISOString(), actor: "agent", text: String(text).slice(0, 200) });
   if (log.length > MAX_LOG) log = log.slice(-MAX_LOG);
 }
 
-/** 画面の状態が変わったら呼ぶ。screen は { stats, board, ... } */
-export function liveUpdate(screen, { ended = false, commentary } = {}) {
-  if (!ENABLED || !sessionId) return;
-  pending = {
+/**
+ * 画面の状態が変わったら呼ぶ。
+ * screen：観戦欄の要約（{ stats, board, ... }）、full：観戦モードで画面を描き直すための全状態
+ */
+export function liveUpdate(screen, { ended = false, full = null } = {}) {
+  if (SPECTATE || !sessionId) return;
+  const state = {
     game_id: GAME_ID,
     game_title: GAME_TITLE,
     session_id: sessionId,
     started_at: startedAt,
-    updated_at: null, // 送る直前に入れる
+    updated_at: null,
     screen,
     log: [...log],
-    ...(commentary ? { commentary } : {}),
+    spectate: true, // この状態は観戦モードで画面を見られる
     ...(ended ? { ended: true } : {}),
   };
-  // 終了の合図は待たずに送る
-  schedule(ended ? 0 : undefined);
+  const fullPayload = full ? { session_id: sessionId, sent_at: new Date().toISOString(), ended, state: full } : null;
+  if (fullPayload) fullOut.push(fullPayload, ended);
+  summaryOut.push({ state, full: fullPayload }, ended);
 }
 
-function schedule(delay) {
-  if (timer) {
-    if (delay !== 0) return;
-    clearTimeout(timer);
-  }
-  const wait = delay ?? Math.max(0, lastSentAt + MIN_INTERVAL_MS - Date.now());
-  timer = setTimeout(() => {
-    timer = null;
-    flush();
-  }, wait);
+// iPhone の Safari などは、裏に回ったタブのタイマーを止める。
+// 送信待ちが残ったままタブを切り替えると最後の状態が届かないので、裏に回る瞬間にすぐ送る
+function flushAll() {
+  fullOut.flushNow();
+  summaryOut.flushNow();
+  flushUsage();
+}
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushAll();
+  });
+  window.addEventListener("pagehide", flushAll);
 }
 
-async function flush() {
-  if (!pending) return;
-  if (!(await connect()) || !client) return;
-  const state = { ...pending, updated_at: new Date().toISOString() };
-  pending = null;
-  lastState = state;
-  lastSentAt = Date.now();
-  // Broadcast はリアルタイム接続が開いているときだけ。ハートビートは接続と関係なく書く
-  if (ready && channel) {
+// ───────── 観戦する側：受信 ─────────
+
+/**
+ * 観戦モードで呼ぶ。全状態を受け取るたびに onFull({ state, ended, sent_at }) を呼ぶ。
+ * 戻り値は購読の解除関数。
+ */
+export function liveSpectate(onFull) {
+  if (!SPECTATE) return () => {};
+  let lastSentAt = "";
+  let disposed = false;
+  const deliver = (payload, counted) => {
+    if (disposed || !payload || typeof payload !== "object" || !payload.state) return;
+    // 古い状態で新しい状態を上書きしない
+    if (payload.sent_at && lastSentAt && payload.sent_at < lastSentAt) return;
+    lastSentAt = payload.sent_at || lastSentAt;
+    if (counted) countUsage("receives", payload);
+    onFull(payload);
+  };
+
+  const onLocal = (e) => deliver(e.data, false);
+  if (local) local.addEventListener("message", onLocal);
+
+  const readHeartbeat = async () => {
     try {
-      await channel.send({ type: "broadcast", event: EVENT, payload: state });
+      if (!(await connect())) return;
+      const { data } = await client.from(TABLE).select("full, updated_at").eq("game_id", GAME_ID).maybeSingle();
+      if (data && data.full) deliver(data.full, false);
     } catch {
-      // 観戦欄に届かなくてもゲームは続ける
+      // 読めなければ次の受信を待つ
     }
-  }
-  try {
-    await client.from(TABLE).upsert({
-      game_id: state.game_id,
-      session_id: state.session_id,
-      updated_at: state.updated_at,
-      state,
-    });
-  } catch {
-    // 同上
-  }
+  };
+  const onVisible = () => {
+    if (document.visibilityState === "visible") readHeartbeat();
+  };
+
+  connect().then((ok) => {
+    if (!ok || disposed) return;
+    channel(FULL_CHANNEL, { event: FULL_EVENT, fn: (payload) => deliver(payload, true) });
+    readHeartbeat();
+  });
+  document.addEventListener("visibilitychange", onVisible);
+
+  return () => {
+    disposed = true;
+    if (local) local.removeEventListener("message", onLocal);
+    document.removeEventListener("visibilitychange", onVisible);
+  };
 }
