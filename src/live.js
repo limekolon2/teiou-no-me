@@ -41,7 +41,11 @@ function connect() {
   if (connecting) return connecting;
   connecting = import("@supabase/supabase-js")
     .then(({ createClient }) => {
-      client = createClient(URL, KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+      client = createClient(URL, KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+        // タブが閉じられる・裏に回る瞬間に出した書き込みも、最後まで届くように
+        global: { fetch: (input, init) => fetch(input, { ...init, keepalive: true }) },
+      });
       channel = client.channel(CHANNEL);
       channel.subscribe((status) => {
         ready = status === "SUBSCRIBED";
@@ -57,6 +61,23 @@ function connect() {
       return false;
     });
   return connecting;
+}
+
+// iPhone の Safari などは、裏に回ったタブのタイマーを止める。
+// 送信待ちが残ったままタブを切り替えると最後の状態が届かないので、裏に回る瞬間にすぐ送る
+function flushNow() {
+  if (!pending) return;
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+  flush();
+}
+if (ENABLED && typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushNow();
+  });
+  window.addEventListener("pagehide", flushNow);
 }
 
 /** プレイ開始（新規・つづきから）のたびに呼ぶ */
